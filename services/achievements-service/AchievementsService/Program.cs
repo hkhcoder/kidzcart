@@ -61,10 +61,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
+// HTTPS redirection is intentionally disabled — TLS is terminated at the
+// reverse proxy / ingress level. The container only speaks plain HTTP internally.
 
 app.UseAuthentication();
 app.UseAuthorization();

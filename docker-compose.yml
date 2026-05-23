@@ -1,0 +1,291 @@
+# =============================================================================
+# KidzCart — Local Development Docker Compose
+#
+# Services:
+#   Infrastructure (stateful):  mysql, mongo, redis, rabbitmq
+#   Application:                marketplace, achievement, product,
+#                               coupon-worker, notification-worker
+#   Frontend:                   frontend (Nginx + Angular build)
+#
+# Usage:
+#   cp .env.example .env        # fill in secrets (already done if .env exists)
+#   docker compose up --build
+#   open http://localhost:4200
+#
+# NOTE: This file is for local development only.
+#       Production runs on Kubernetes — see k8s/ (future).
+# =============================================================================
+
+name: kidzcart
+
+# ---------------------------------------------------------------------------
+# Re-usable health-check defaults
+# ---------------------------------------------------------------------------
+x-healthcheck-defaults: &healthcheck-defaults
+  interval: 10s
+  timeout: 5s
+  retries: 10
+  start_period: 30s
+
+services:
+
+  # ===========================================================================
+  # INFRASTRUCTURE
+  # ===========================================================================
+
+  mysql:
+    image: mysql:8.4
+    container_name: kidzcart-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      # Both databases (kids_marketplace_auth + kids_marketplace_order) are
+      # created by the init SQL script — no single MYSQL_DATABASE needed.
+    volumes:
+      - mysql-data:/var/lib/mysql
+      # Auto-runs on first start (when data volume is empty)
+      - ./db/kids_marketplace_mysql_init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    ports:
+      - "3306:3306"   # exposed for local DB tools (TablePlus, DBeaver, etc.)
+    networks:
+      - kidzcart-net
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost",
+             "-u", "${MYSQL_USER}", "-p${MYSQL_PASSWORD}"]
+
+  mongo:
+    image: mongo:7.0
+    container_name: kidzcart-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    volumes:
+      - mongo-data:/data/db
+      # Seed script — runs once on first start via entrypoint-initdb.d
+      # JS file is mounted outside initdb.d to prevent MongoDB from running it
+      # a second time directly (which would seed the wrong 'test' database).
+      - ./db/kids_marketplace_init.js:/docker-seed/kids_marketplace_init.js:ro
+      - ./db/mongo-init.sh:/docker-entrypoint-initdb.d/00-run-seed.sh:ro
+    ports:
+      - "27017:27017"  # exposed for local Compass / mongosh access
+    networks:
+      - kidzcart-net
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: kidzcart-redis
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"   # exposed for local redis-cli / RedisInsight
+    networks:
+      - kidzcart-net
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD", "redis-cli", "ping"]
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: kidzcart-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    ports:
+      - "5672:5672"    # AMQP
+      - "15672:15672"  # Management UI → http://localhost:15672
+    networks:
+      - kidzcart-net
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+
+  # ===========================================================================
+  # APPLICATION SERVICES
+  # ===========================================================================
+
+  marketplace:
+    build:
+      context: ./services/marketplace-service
+      dockerfile: Dockerfile
+    image: kidzcart/marketplace:local
+    container_name: kidzcart-marketplace
+    restart: unless-stopped
+    environment:
+      # Override application.properties values via Spring env var convention
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/kids_marketplace_auth?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+    ports:
+      - "4001:4001"
+    networks:
+      - kidzcart-net
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD-SHELL", "curl -sf http://localhost:4001/health || exit 1"]
+
+  achievement:
+    build:
+      context: ./services/achievements-service
+      dockerfile: Dockerfile
+    image: kidzcart/achievement:local
+    container_name: kidzcart-achievement
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:4006
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+      # achievements-service reads donations from product-donation-service
+      DONATIONS_SERVICE_URL: ${DONATIONS_SERVICE_URL}
+    ports:
+      - "4006:4006"
+    networks:
+      - kidzcart-net
+    depends_on:
+      product:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD-SHELL", "curl -sf http://localhost:4006/health || exit 1"]
+
+  product:
+    build:
+      context: ./services/product-donation-service
+      dockerfile: Dockerfile
+    image: kidzcart/product:local
+    container_name: kidzcart-product
+    restart: unless-stopped
+    command: ["node", "src/server.js"]
+    environment:
+      PORT: ${PORT}
+      MONGO_URI: ${MONGO_URI}
+      REDIS_URL: ${REDIS_URL}
+      REDIS_CACHE_TTL_LIST: ${REDIS_CACHE_TTL_LIST}
+      REDIS_CACHE_TTL_ONE: ${REDIS_CACHE_TTL_ONE}
+      AUTH_USER_SERVICE_URL: ${AUTH_USER_SERVICE_URL}
+      MARKETPLACE_SERVICE_URL: ${MARKETPLACE_SERVICE_URL}
+      ORDER_COUPON_SERVICE_URL: ${ORDER_COUPON_SERVICE_URL}
+      ACHIEVEMENTS_SERVICE_URL: ${ACHIEVEMENTS_SERVICE_URL}
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      RABBITMQ_QUEUE_NAME: ${RABBITMQ_QUEUE_NAME}
+      RABBITMQ_NOTIFICATION_QUEUE: ${RABBITMQ_NOTIFICATION_QUEUE}
+    ports:
+      - "4002:4002"
+    networks:
+      - kidzcart-net
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      marketplace:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:4002/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))\""]
+
+  coupon-worker:
+    build:
+      context: ./services/product-donation-service
+      dockerfile: Dockerfile
+    image: kidzcart/product:local   # reuses the same image as product
+    container_name: kidzcart-coupon-worker
+    restart: unless-stopped
+    command: ["node", "src/workers/couponWorker.js"]
+    environment:
+      MONGO_URI: ${MONGO_URI}
+      MARKETPLACE_SERVICE_URL: ${MARKETPLACE_SERVICE_URL}
+      ORDER_COUPON_SERVICE_URL: ${ORDER_COUPON_SERVICE_URL}
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      RABBITMQ_QUEUE_NAME: ${RABBITMQ_QUEUE_NAME}
+    networks:
+      - kidzcart-net
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      marketplace:
+        condition: service_healthy
+
+  notification-worker:
+    build:
+      context: ./services/product-donation-service
+      dockerfile: Dockerfile
+    image: kidzcart/product:local   # reuses the same image as product
+    container_name: kidzcart-notification-worker
+    restart: unless-stopped
+    command: ["node", "src/workers/notificationWorker.js"]
+    environment:
+      MONGO_URI: ${MONGO_URI}
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      RABBITMQ_NOTIFICATION_QUEUE: ${RABBITMQ_NOTIFICATION_QUEUE}
+    networks:
+      - kidzcart-net
+    depends_on:
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # ===========================================================================
+  # FRONTEND
+  # ===========================================================================
+
+  frontend:
+    build:
+      context: ./frontend/kids-marketplace-ui
+      dockerfile: Dockerfile
+    image: kidzcart/frontend:local
+    container_name: kidzcart-frontend
+    restart: unless-stopped
+    ports:
+      - "4200:80"   # http://localhost:4200
+    networks:
+      - kidzcart-net
+    depends_on:
+      marketplace:
+        condition: service_healthy
+      product:
+        condition: service_healthy
+      achievement:
+        condition: service_healthy
+
+# =============================================================================
+# VOLUMES — named volumes for stateful services
+# =============================================================================
+volumes:
+  mysql-data:
+    driver: local
+  mongo-data:
+    driver: local
+  redis-data:
+    driver: local
+  rabbitmq-data:
+    driver: local
+
+# =============================================================================
+# NETWORKS
+# =============================================================================
+networks:
+  kidzcart-net:
+    driver: bridge
+    name: kidzcart-net

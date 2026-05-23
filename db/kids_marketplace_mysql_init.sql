@@ -4,6 +4,14 @@
 -- Run: mysql -u <user> -p < db/kids_marketplace_mysql_init.sql
 
 -- =============================================================================
+-- 0) Grant the 'admin' user access to both databases
+--    (MYSQL_USER creates the user but grants no DB-level permissions)
+-- =============================================================================
+GRANT ALL PRIVILEGES ON kids_marketplace_auth.* TO 'admin'@'%';
+GRANT ALL PRIVILEGES ON kids_marketplace_order.* TO 'admin'@'%';
+FLUSH PRIVILEGES;
+
+-- =============================================================================
 -- 1) Auth database
 -- =============================================================================
 
