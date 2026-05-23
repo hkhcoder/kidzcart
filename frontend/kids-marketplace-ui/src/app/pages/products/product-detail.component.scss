@@ -1,0 +1,251 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;0,9..40,800&family=Nunito:wght@400;600;700;800;900&display=swap');
+
+:host {
+  display: block;
+  font-family: 'DM Sans', 'Nunito', system-ui, sans-serif;
+  margin: -2rem -1.5rem -3rem;
+  padding: 0 1.5rem 3rem;
+  background: #fafafa;
+  min-height: calc(100vh - 80px);
+}
+
+@media (max-width: 768px) {
+  :host {
+    margin: -1.5rem -1rem -2rem;
+    padding: 0 1rem 2rem;
+  }
+}
+
+.detail-page {
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.module {
+  border-radius: 22px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 32px rgba(15, 23, 42, 0.07);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  background: #fff;
+}
+
+.status-module {
+  text-align: center;
+  font-weight: 800;
+  color: #fff;
+  background: var(--btn-surface);
+  color: var(--btn-on-surface);
+}
+
+.error-module {
+  font-weight: 800;
+  color: #b91c1c;
+  background: #fff1f2;
+  border-color: #fecdd3;
+}
+
+.hero-module {
+  background: #fafafa;
+  border: 1px solid #e5e5e5;
+  padding: 1.75rem 1.5rem;
+  margin-top: 0.35rem;
+}
+
+.hero-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.cover-wrap {
+  flex: 0 0 auto;
+  width: min(260px, 100%);
+  border-radius: 20px;
+  overflow: hidden;
+  background: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+}
+
+.cover-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.hero-copy {
+  flex: 1;
+  min-width: 220px;
+}
+
+.hero-kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #525252;
+}
+
+.product-title {
+  margin: 0 0 0.4rem;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 900;
+  color: #1a1a2e;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.product-tagline {
+  margin: 0 0 1rem;
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.price-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.price-big {
+  font-size: 1.75rem;
+  font-weight: 900;
+  background: var(--btn-surface);
+  color: var(--btn-on-surface);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.cat-chip {
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: capitalize;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.12);
+  color: var(--ink, #312e81);
+}
+
+.section-label {
+  margin: 0 0 0.65rem;
+  font-size: 1rem;
+  font-weight: 900;
+  color: #1a1a2e;
+}
+
+.desc-text {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: #555;
+  line-height: 1.55;
+}
+
+.info-module {
+  padding: 1.25rem 1.5rem;
+}
+
+.action-module {
+  padding: 1.35rem 1.5rem;
+  background: #fff;
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.qty-box label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  margin-bottom: 0.35rem;
+}
+
+.qty-input {
+  width: 88px;
+  padding: 0.55rem 0.65rem;
+  border-radius: 14px;
+  border: 2px solid #e2e8f0;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.qty-input:focus {
+  outline: none;
+  border-color: var(--ink, #312e81);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.15);
+}
+
+.btn-add {
+  border: none;
+  border-radius: 999px;
+  padding: 0.65rem 1.35rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 900;
+  cursor: pointer;
+  color: #fff;
+  background: var(--btn-surface);
+  color: var(--btn-on-surface);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  transition: transform 0.15s;
+}
+
+.btn-add:hover {
+  transform: translateY(-2px);
+}
+
+.btn-ghost-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.92rem;
+  text-decoration: none;
+  color: var(--ink, #312e81);
+  border: 2px solid rgba(0, 0, 0, 0.35);
+  background: #fff;
+}
+
+.btn-ghost-link:hover {
+  background: #f5f5f5;
+}
+
+@media (max-width: 600px) {
+  .hero-row {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .price-row {
+    justify-content: center;
+  }
+
+  .action-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-add,
+  .btn-ghost-link {
+    justify-content: center;
+    width: 100%;
+  }
+}

@@ -1,0 +1,42 @@
+<footer class="site-footer" aria-labelledby="site-footer-title">
+  <div class="site-footer__inner">
+    <div class="site-footer__top">
+      <div class="site-footer__brand">
+        <p id="site-footer-title" class="site-footer__logo">KidzCart</p>
+        <p class="site-footer__tagline">{{ tagline }}</p>
+      </div>
+
+      <div class="site-footer__modules" role="navigation" aria-label="Footer">
+        <section
+          *ngFor="let s of sections; let i = index"
+          class="site-footer__module"
+          [attr.aria-labelledby]="'footer-mod-' + i"
+        >
+          <h2 class="site-footer__module-title" [id]="'footer-mod-' + i">
+            <span class="site-footer__module-icon" aria-hidden="true">{{ s.icon }}</span>
+            {{ s.title }}
+          </h2>
+          <ul class="site-footer__links">
+            <li *ngFor="let link of s.links">
+              <a
+                [routerLink]="link.routerLink"
+                [queryParams]="link.queryParams || {}"
+                class="site-footer__link"
+              >
+                {{ link.label }}
+              </a>
+            </li>
+          </ul>
+        </section>
+      </div>
+    </div>
+
+    <div class="site-footer__bottom">
+      <p class="site-footer__fine">
+        <span aria-hidden="true">🌈</span>
+        Thanks for visiting — every little share helps another kid smile.
+      </p>
+      <p class="site-footer__copy">© {{ currentYear }} KidzCart · Play nice, shop kind.</p>
+    </div>
+  </div>
+</footer>

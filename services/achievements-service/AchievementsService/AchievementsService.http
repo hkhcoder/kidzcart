@@ -1,0 +1,6 @@
+@AchievementsService_HostAddress = http://localhost:4006
+
+GET {{AchievementsService_HostAddress}}/health
+Accept: application/json
+
+###

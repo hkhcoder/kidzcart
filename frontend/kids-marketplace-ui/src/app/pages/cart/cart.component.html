@@ -1,0 +1,77 @@
+<div class="cart-page">
+  <section class="module hero-cart" aria-labelledby="cart-title">
+    <div class="hero-cart-inner">
+      <div class="hero-cart-copy">
+        <p class="hero-kicker">Your basket</p>
+        <h1 id="cart-title" class="hero-title">Shopping cart</h1>
+        <p class="hero-sub">
+          {{ items.length === 0 ? 'Add books, toys, or clothes — your picks show up here.' : 'Review quantities, then head to checkout when you are ready.' }}
+        </p>
+      </div>
+      <div class="hero-cart-art" aria-hidden="true">
+        <img
+          [src]="items.length === 0 ? 'assets/icons/cart.png' : 'assets/icons/cart.png'"
+          alt=""
+          class="hero-cart-img"
+        />
+      </div>
+    </div>
+  </section>
+
+  <div class="cart-layout" *ngIf="items.length > 0">
+    <section class="module items-module" aria-label="Cart items">
+      <h2 class="module-heading">Items ({{ items.length }})</h2>
+      <ul class="cart-list">
+        <li *ngFor="let it of items" class="cart-row">
+          <div class="row-visual">
+            <img class="row-thumb" [src]="cartImage(it)" [alt]="it.name" />
+          </div>
+          <div class="row-body">
+            <div class="row-title">{{ it.name }}</div>
+            <div class="row-meta">₹ {{ it.price }} each</div>
+            <div class="row-qty">
+              <label [attr.for]="'qty-' + it.productId">Quantity</label>
+              <input
+                [id]="'qty-' + it.productId"
+                type="number"
+                min="1"
+                [(ngModel)]="it.qty"
+                (ngModelChange)="qtyChanged(it.productId, it.qty)"
+                class="qty-input"
+              />
+            </div>
+          </div>
+          <div class="row-side">
+            <div class="row-line-total">₹ {{ it.price * it.qty }}</div>
+            <button type="button" class="btn-remove" (click)="remove(it.productId)">Remove</button>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <aside class="module summary-module">
+      <h2 class="module-heading">Order summary</h2>
+      <div class="summary-lines">
+        <div class="summary-line">
+          <span>Subtotal</span>
+          <span>₹ {{ subtotal }}</span>
+        </div>
+        <div class="summary-line muted">
+          <span>Shipping</span>
+          <span>Simulated</span>
+        </div>
+      </div>
+      <div class="summary-total">
+        <span>Total</span>
+        <span class="total-amount">₹ {{ subtotal }}</span>
+      </div>
+      <button type="button" class="btn-checkout" (click)="goCheckout()">Checkout</button>
+      <a routerLink="/products" class="link-continue">+ Continue shopping</a>
+    </aside>
+  </div>
+
+  <section class="module empty-module" *ngIf="items.length === 0">
+    <p class="empty-text">Your cart is empty for now.</p>
+    <a routerLink="/products" [queryParams]="{ category: 'books' }" class="btn-browse">Browse products</a>
+  </section>
+</div>

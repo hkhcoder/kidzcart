@@ -1,0 +1,269 @@
+<div class="profile-page">
+  <section class="module hero-module" aria-labelledby="profile-hero-title">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="hero-kicker">Your space 🌟</p>
+        <h1 id="profile-hero-title" class="hero-title">Hello, friend!</h1>
+        <p class="hero-lead">See your orders, kind donations, and any surprise coupons you’ve earned.</p>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <img src="assets/icons/profile.png" alt="" class="hero-img" />
+      </div>
+    </div>
+  </section>
+
+  <section class="module block-module block-module--api" aria-labelledby="api-health-heading">
+    <h2 id="api-health-heading" class="block-title">
+      <span class="title-emoji" aria-hidden="true">🔌</span> API checks
+    </h2>
+    <p class="block-hint">
+      Set <code>REDIS_URL</code> / <code>RABBITMQ_URL</code> on the server to enable them.
+    </p>
+    <div class="api-actions">
+      <button
+        type="button"
+        class="btn-api btn-api--primary"
+        (click)="checkBothBackends()"
+        [disabled]="redisState === 'loading' || rabbitState === 'loading'"
+      >
+        Check both
+      </button>
+    </div>
+
+    <div class="api-grid">
+      <div class="api-cell">
+        <h3 class="api-cell-title">Redis</h3>
+        <button
+          type="button"
+          class="btn-api"
+          (click)="checkRedis()"
+          [disabled]="redisState === 'loading'"
+        >
+          {{ redisState === 'loading' ? 'Checking…' : 'Verify Redis' }}
+        </button>
+        <div *ngIf="redisState === 'done'" class="api-result" [class.api-result--ok]="redisOk()" [class.api-result--warn]="redisDisabled()" [class.api-result--bad]="redisOk() === false && !redisDisabled()">
+          <span class="api-result-label" *ngIf="redisOk()">Connected</span>
+          <span class="api-result-label" *ngIf="redisDisabled()">Disabled</span>
+          <span class="api-result-label" *ngIf="redisOk() === false && !redisDisabled()">Not healthy</span>
+          <pre class="api-result-json">{{ redisBody | json }}</pre>
+        </div>
+        <div *ngIf="redisState === 'error'" class="api-result api-result--bad">
+          <span class="api-result-label">Failed</span>
+          <p class="api-result-err">{{ redisError }}</p>
+          <pre *ngIf="redisBody" class="api-result-json">{{ redisBody | json }}</pre>
+        </div>
+      </div>
+
+      <div class="api-cell">
+        <h3 class="api-cell-title">RabbitMQ</h3>
+        <button
+          type="button"
+          class="btn-api"
+          (click)="checkRabbit()"
+          [disabled]="rabbitState === 'loading'"
+        >
+          {{ rabbitState === 'loading' ? 'Checking…' : 'Verify RabbitMQ' }}
+        </button>
+        <div *ngIf="rabbitState === 'done'" class="api-result" [class.api-result--ok]="rabbitOk()" [class.api-result--warn]="rabbitDisabled()" [class.api-result--bad]="rabbitOk() === false && !rabbitDisabled()">
+          <span class="api-result-label" *ngIf="rabbitOk()">Broker OK</span>
+          <span class="api-result-label" *ngIf="rabbitDisabled()">Disabled</span>
+          <span class="api-result-label" *ngIf="rabbitOk() === false && !rabbitDisabled()">Not reachable</span>
+          <pre class="api-result-json">{{ rabbitBody | json }}</pre>
+        </div>
+        <div *ngIf="rabbitState === 'error'" class="api-result api-result--bad">
+          <span class="api-result-label">Failed</span>
+          <p class="api-result-err">{{ rabbitError }}</p>
+          <pre *ngIf="rabbitBody" class="api-result-json">{{ rabbitBody | json }}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div *ngIf="error" class="status-banner" role="alert">{{ error }}</div>
+
+  <section class="module user-module" *ngIf="user">
+    <div class="user-row">
+      <div class="user-avatar" [attr.aria-label]="user.name">{{ user.name.slice(0, 1).toUpperCase() }}</div>
+      <div class="user-meta">
+        <h2 class="user-name">{{ user.name }}</h2>
+        <p class="user-email">{{ user.email }}</p>
+      </div>
+      <a routerLink="/donate" class="btn-pill btn-pill--donate">Donate 💝</a>
+    </div>
+  </section>
+
+  <section class="module block-module profile-accordion" id="notifications" aria-labelledby="notif-heading">
+    <h2 id="notif-heading" class="sr-only">Notifications</h2>
+    <button
+      type="button"
+      class="profile-accordion__toggle"
+      (click)="toggleNotifPanel()"
+      [attr.aria-expanded]="notifPanelOpen"
+      aria-controls="notif-panel-body"
+    >
+      <span class="profile-accordion__title"><span aria-hidden="true">🔔</span> Notifications</span>
+      <span class="profile-accordion__count" *ngIf="notifications.length">{{ notifications.length }}</span>
+      <span class="profile-accordion__chev" [class.profile-accordion__chev--open]="notifPanelOpen" aria-hidden="true">▼</span>
+    </button>
+    <div class="profile-accordion__body" id="notif-panel-body" *ngIf="notifPanelOpen">
+      <p *ngIf="notificationsError" class="notif-error" role="alert">{{ notificationsError }}</p>
+      <p class="block-hint notif-queue-hint" *ngIf="rabbitBrokerDown">
+        RabbitMQ is offline — queued jobs won’t run, but messages below are loaded from the database (saved when you donate).
+      </p>
+      <p class="block-hint" *ngIf="!notificationsError && notifications.length === 0">
+        No messages yet — make a donation to see a thank-you note here (saved immediately when you donate).
+      </p>
+      <ul class="notif-list" *ngIf="notifications.length > 0">
+        <li
+          *ngFor="let n of visibleNotifications"
+          class="notif-item"
+          [class.notif-item--unread]="!n.read"
+        >
+          <div class="notif-row">
+            <div class="notif-copy">
+              <div class="notif-title">{{ n.title }}</div>
+              <p class="notif-body">{{ n.body }}</p>
+              <span class="notif-time">{{ n.createdAt | date : 'medium' }}</span>
+            </div>
+            <button
+              *ngIf="!n.read"
+              type="button"
+              class="btn-notif-read"
+              (click)="markNotificationRead(n)"
+            >
+              Mark read
+            </button>
+          </div>
+        </li>
+      </ul>
+      <button
+        type="button"
+        class="profile-accordion__more"
+        *ngIf="notifPanelOpen && hasMoreNotifications"
+        (click)="notifShowAll = true"
+      >
+        Show {{ notifications.length - previewLimit }} more
+      </button>
+      <button
+        type="button"
+        class="profile-accordion__more profile-accordion__more--muted"
+        *ngIf="notifPanelOpen && notifShowAll && notifications.length > previewLimit"
+        (click)="notifShowAll = false"
+      >
+        Show less
+      </button>
+    </div>
+  </section>
+
+  <div class="stack-modules">
+    <section class="module block-module" aria-labelledby="coupon-heading">
+      <h2 id="coupon-heading" class="block-title"><span class="title-emoji" aria-hidden="true">🎟️</span> My coupon</h2>
+      <p class="block-hint" *ngIf="!latestCoupon">No coupon yet — donate something nice and a thank-you code might pop up!</p>
+
+      <div *ngIf="latestCoupon" class="coupon-panel">
+        <div class="coupon-badge">10% OFF</div>
+        <div class="coupon-row">
+          <div>
+            <span class="coupon-label">Your code</span>
+            <div class="coupon-code">{{ latestCoupon }}</div>
+          </div>
+          <a routerLink="/checkout" class="btn-pill btn-pill--primary">Use it ✨</a>
+        </div>
+        <p *ngIf="couponValidation" class="coupon-status">
+          Status: <strong>{{ couponValidation.valid ? 'Ready to use' : 'Hmm, check again' }}</strong>
+          <span class="muted-inline">({{ couponValidation.reason }})</span>
+        </p>
+      </div>
+    </section>
+
+    <section class="module block-module profile-accordion" aria-labelledby="orders-heading">
+      <h2 id="orders-heading" class="sr-only">Orders</h2>
+      <button
+        type="button"
+        class="profile-accordion__toggle"
+        (click)="toggleOrdersPanel()"
+        [attr.aria-expanded]="ordersPanelOpen"
+        aria-controls="orders-panel-body"
+      >
+        <span class="profile-accordion__title"><span aria-hidden="true">📦</span> Orders</span>
+        <span class="profile-accordion__count" *ngIf="orders.length">{{ orders.length }}</span>
+        <span class="profile-accordion__chev" [class.profile-accordion__chev--open]="ordersPanelOpen" aria-hidden="true">▼</span>
+      </button>
+      <div class="profile-accordion__body" id="orders-panel-body" *ngIf="ordersPanelOpen">
+        <p class="block-hint" *ngIf="orders.length === 0">No orders yet — fill your cart and come back here!</p>
+        <ul class="item-list" *ngIf="orders.length > 0">
+          <li *ngFor="let o of visibleOrders" class="item-card">
+            <div class="item-top">
+              <span class="item-name">Order #{{ o.id }}</span>
+              <span class="price-tag">₹ {{ o.total }}</span>
+            </div>
+            <p class="item-detail muted-line">
+              Stuff: {{ o.subtotal }} · Saved: {{ o.discountApplied }} · Code: {{ o.couponCode || '—' }}
+            </p>
+            <p class="item-detail muted-line">Payment: {{ o.paymentStatus }} · {{ o.createdAt }}</p>
+          </li>
+        </ul>
+        <button
+          type="button"
+          class="profile-accordion__more"
+          *ngIf="ordersPanelOpen && hasMoreOrders"
+          (click)="ordersShowAll = true"
+        >
+          Show {{ orders.length - previewLimit }} more
+        </button>
+        <button
+          type="button"
+          class="profile-accordion__more profile-accordion__more--muted"
+          *ngIf="ordersPanelOpen && ordersShowAll && orders.length > previewLimit"
+          (click)="ordersShowAll = false"
+        >
+          Show less
+        </button>
+      </div>
+    </section>
+
+    <section class="module block-module profile-accordion" aria-labelledby="donations-heading">
+      <h2 id="donations-heading" class="sr-only">Donations</h2>
+      <button
+        type="button"
+        class="profile-accordion__toggle"
+        (click)="toggleDonationsPanel()"
+        [attr.aria-expanded]="donationsPanelOpen"
+        aria-controls="donations-panel-body"
+      >
+        <span class="profile-accordion__title"><span aria-hidden="true">💚</span> Donations</span>
+        <span class="profile-accordion__count" *ngIf="donationsList.length">{{ donationsList.length }}</span>
+        <span class="profile-accordion__chev" [class.profile-accordion__chev--open]="donationsPanelOpen" aria-hidden="true">▼</span>
+      </button>
+      <div class="profile-accordion__body" id="donations-panel-body" *ngIf="donationsPanelOpen">
+        <p class="block-hint" *ngIf="donationsList.length === 0">Nothing here yet — sharing is caring!</p>
+        <ul class="item-list" *ngIf="donationsList.length > 0">
+          <li *ngFor="let d of visibleDonations" class="item-card item-card--mint">
+            <div class="item-top">
+              <span class="item-name">Donation #{{ d.id }}</span>
+              <span class="status-pill">{{ d.status }}</span>
+            </div>
+            <p class="item-detail muted-line">Items: {{ donationItemsLabel(d) }}</p>
+            <p class="item-detail muted-line">{{ d.createdAt }}</p>
+          </li>
+        </ul>
+        <button
+          type="button"
+          class="profile-accordion__more"
+          *ngIf="donationsPanelOpen && hasMoreDonations"
+          (click)="donationsShowAll = true"
+        >
+          Show {{ donationsList.length - previewLimit }} more
+        </button>
+        <button
+          type="button"
+          class="profile-accordion__more profile-accordion__more--muted"
+          *ngIf="donationsPanelOpen && donationsShowAll && donationsList.length > previewLimit"
+          (click)="donationsShowAll = false"
+        >
+          Show less
+        </button>
+      </div>
+    </section>
+  </div>
+</div>

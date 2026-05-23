@@ -1,0 +1,23 @@
+<div class="kz-promo" role="region" aria-label="Store announcements">
+  <div class="kz-promo__utility">
+    <span class="kz-promo__ship"><strong>FREE SHIPPING</strong> on orders above ₹599</span>
+    <span class="kz-promo__sep" aria-hidden="true">|</span>
+    <span class="kz-promo__contact">Questions? We’re here to help — shop with confidence.</span>
+  </div>
+  <div class="promo-strip" aria-label="Current offers">
+    <div class="promo-strip__track">
+      <p class="promo-strip__line">
+        <ng-container *ngFor="let p of parts">
+          <strong *ngIf="p.code" class="promo-strip__code">{{ p.code }}</strong>
+          <span *ngIf="!p.code">{{ p.text }}</span>
+        </ng-container>
+      </p>
+      <p class="promo-strip__line promo-strip__line--dup" aria-hidden="true">
+        <ng-container *ngFor="let p of parts">
+          <strong *ngIf="p.code" class="promo-strip__code">{{ p.code }}</strong>
+          <span *ngIf="!p.code">{{ p.text }}</span>
+        </ng-container>
+      </p>
+    </div>
+  </div>
+</div>

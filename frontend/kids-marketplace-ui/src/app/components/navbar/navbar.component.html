@@ -1,0 +1,151 @@
+<header class="kids-nav" role="banner">
+  <div class="nav-module nav-brand">
+    <a routerLink="/" class="brand-link" (click)="closeMenu()">
+      <span class="brand-badge" aria-hidden="true">KC</span>
+      <span class="brand-text">
+        <span class="brand-title">KidzCart</span>
+        <span class="brand-tagline">Shop · Share · Smile</span>
+      </span>
+    </a>
+  </div>
+
+  <button
+    type="button"
+    class="nav-menu-btn"
+    [class.open]="menuOpen"
+    (click)="toggleMenu()"
+    [attr.aria-expanded]="menuOpen"
+    aria-controls="main-nav-rail"
+    [attr.aria-label]="menuOpen ? 'Close menu' : 'Open menu'"
+  >
+    <span class="nav-menu-bar"></span>
+    <span class="nav-menu-bar"></span>
+    <span class="nav-menu-bar"></span>
+  </button>
+
+  <nav
+    id="main-nav-rail"
+    class="nav-module nav-rail"
+    [class.nav-rail--open]="menuOpen"
+    aria-label="Main navigation"
+  >
+    <div class="nav-rail-inner">
+      <a
+        [routerLink]="homeLink.path"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: !!homeLink.exact }"
+        class="nav-chip nav-chip--flat"
+        (click)="closeMenu()"
+      >
+        <span class="nav-chip-emoji" aria-hidden="true">{{ homeLink.emoji }}</span>
+        <span class="nav-chip-label">{{ homeLink.label }}</span>
+      </a>
+
+      <div class="nav-dropdown nav-dropdown--shop">
+        <span class="nav-dropdown__trigger">
+          <span class="nav-chip-emoji" aria-hidden="true">🧸</span>
+          Shop
+          <span class="nav-dropdown__chev" aria-hidden="true">▾</span>
+        </span>
+        <div class="nav-dropdown__panel" role="menu">
+          <a
+            *ngFor="let c of shopCategories"
+            [routerLink]="['/products']"
+            [queryParams]="c.queryParams"
+            class="nav-dropdown__link"
+            role="menuitem"
+            (click)="closeMenu()"
+          >
+            {{ c.label }}
+          </a>
+        </div>
+      </div>
+
+      <a
+        *ngFor="let link of navLinks"
+        [routerLink]="link.path"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: !!link.exact }"
+        class="nav-chip nav-chip--flat"
+        (click)="closeMenu()"
+      >
+        <span class="nav-chip-emoji" aria-hidden="true">{{ link.emoji }}</span>
+        <span class="nav-chip-label">{{ link.label }}</span>
+      </a>
+
+      <a
+        routerLink="/cart"
+        routerLinkActive="active"
+        class="nav-chip nav-chip--flat nav-chip--bag"
+        aria-label="Shopping bag"
+        (click)="closeMenu()"
+      >
+        <span class="nav-chip-emoji" aria-hidden="true">🛍️</span>
+        <span class="nav-chip-label">Bag</span>
+        <ng-container *ngIf="cartCount$ | async as cartN">
+          <span class="nav-cart__badge" *ngIf="cartN > 0">{{ cartN > 99 ? '99+' : cartN }}</span>
+        </ng-container>
+      </a>
+    </div>
+  </nav>
+
+  <div class="nav-module nav-actions">
+    <div class="nav-auth">
+      <ng-container *ngIf="user$ | async as user; else loggedOut">
+        <div class="user-bubble">
+          <a
+            routerLink="/profile"
+            fragment="notifications"
+            class="nav-notif-link"
+            aria-label="Notifications"
+            (click)="closeMenu()"
+          >
+            <span class="nav-notif-icon" aria-hidden="true">🔔</span>
+            <ng-container *ngIf="unreadCount$ | async as uc">
+              <span class="nav-notif-badge" *ngIf="uc > 0">{{ uc > 99 ? '99+' : uc }}</span>
+            </ng-container>
+          </a>
+          <div class="user-avatar" [title]="user.name">{{ user.name.slice(0, 1).toUpperCase() }}</div>
+          <span class="user-firstname" *ngIf="firstName(user.name)">{{ firstName(user.name) }}</span>
+          <button type="button" class="btn-kids btn-kids--ghost" (click)="openLogoutConfirm()">Logout</button>
+          <a
+            routerLink="/profile"
+            class="btn-kids btn-kids--ghost nav-profile-link"
+            routerLinkActive="nav-profile-link--active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            (click)="closeMenu()"
+          >
+            Profile
+          </a>
+        </div>
+      </ng-container>
+      <ng-template #loggedOut>
+        <a routerLink="/auth" class="btn-kids btn-kids--solid" (click)="closeMenu()">Login</a>
+      </ng-template>
+    </div>
+  </div>
+</header>
+
+<div class="nav-backdrop" *ngIf="menuOpen" (click)="closeMenu()" aria-hidden="true"></div>
+
+<div
+  class="logout-modal-backdrop"
+  *ngIf="logoutConfirmOpen"
+  (click)="cancelLogout()"
+  aria-hidden="false"
+>
+  <div
+    class="logout-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="logout-dialog-title"
+    (click)="stopModalDismiss($event)"
+  >
+    <h2 id="logout-dialog-title" class="logout-modal-title">Log out?</h2>
+    <p class="logout-modal-text">You’ll need to sign in again to shop or donate.</p>
+    <div class="logout-modal-actions">
+      <button type="button" class="logout-btn logout-btn--secondary" (click)="cancelLogout()">Stay</button>
+      <button type="button" class="logout-btn logout-btn--primary" (click)="confirmLogout()">Log out</button>
+    </div>
+  </div>
+</div>

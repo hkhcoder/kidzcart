@@ -1,0 +1,94 @@
+<div class="donation-page">
+  <section class="module hero-module" aria-labelledby="donate-title">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="hero-kicker">Make someone’s day 💚</p>
+        <h1 id="donate-title" class="hero-title">Donate {{ categoryEmoji }} {{ categoryTitle }}</h1>
+        <p class="hero-lead">
+          Tell us about what you’re sharing. In this demo, donations are approved automatically — and you might earn a
+          <strong>10% off</strong> thank-you coupon!
+        </p>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <img src="assets/icons/donate.jpg" alt="" class="hero-img" />
+      </div>
+    </div>
+  </section>
+
+  <section class="module category-module" aria-labelledby="donate-category-heading">
+    <h2 id="donate-category-heading" class="section-label">What are you donating?</h2>
+    <p class="category-hint">Pick a category — same as home, without going back.</p>
+    <div class="category-strip" role="group" aria-label="Donation category">
+      <button
+        type="button"
+        *ngFor="let opt of categoryOptions"
+        class="cat-tile"
+        [class.active]="category === opt.id"
+        (click)="selectCategory(opt.id)"
+      >
+        <img [src]="opt.icon" alt="" class="cat-tile-icon" />
+        <span>{{ opt.label }}</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="module form-module">
+    <h2 class="section-label">Tell us about your gift</h2>
+
+    <div class="stack-fields">
+      <div class="field">
+        <label for="itemName">What’s it called? {{ categoryEmoji }}</label>
+        <input id="itemName" type="text" [(ngModel)]="itemName" [placeholder]="itemNamePlaceholder" class="input-kids" />
+      </div>
+
+      <div class="row-fields">
+        <div class="field">
+          <label for="condition">How does it look?</label>
+          <select id="condition" [(ngModel)]="condition" class="input-kids">
+            <option value="good">Good — loved but tidy</option>
+            <option value="average">Okay — some wear</option>
+            <option value="new">Like new — wow!</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="ageGroup">Best for ages</label>
+          <select id="ageGroup" [(ngModel)]="ageGroup" class="input-kids">
+            <option value="3-5">3–5</option>
+            <option value="6-8">6–8</option>
+            <option value="9-12">9–12</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="note">Extra note (optional) ✏️</label>
+        <input id="note" type="text" [(ngModel)]="note" placeholder="Anything we should know?" class="input-kids" />
+      </div>
+
+      <div *ngIf="error" class="error-banner" role="alert">{{ error }}</div>
+
+      <button type="button" class="btn-submit" (click)="submit()" [disabled]="loading">
+        {{ loading ? 'Sending… 🚀' : 'Send my donation 🎁' }}
+      </button>
+    </div>
+  </section>
+
+  <section class="module success-module" *ngIf="success">
+    <div class="success-icon" aria-hidden="true">🎉</div>
+    <h2 class="success-title">You did it!</h2>
+    <p class="success-desc">Your donation is in. Status: <strong>{{ success.status }}</strong></p>
+
+    <div *ngIf="couponQueued && !couponCode" class="coupon-pending">
+      <p class="coupon-intro">Your thank-you discount is on the way.</p>
+      <p class="coupon-pending-desc">It will be ready for checkout shortly — or try checkout in a moment.</p>
+      <button type="button" class="btn-submit btn-submit--wide" (click)="goCheckout()">Go to checkout 🛒</button>
+    </div>
+
+    <div *ngIf="couponCode" class="coupon-celebrate">
+      <p class="coupon-intro">You earned a thank-you surprise:</p>
+      <div class="coupon-big">10% OFF</div>
+      <p class="coupon-code-line">Code: <strong>{{ couponCode }}</strong></p>
+      <button type="button" class="btn-submit btn-submit--wide" (click)="goCheckout()">Use it at checkout 🛒</button>
+    </div>
+  </section>
+</div>

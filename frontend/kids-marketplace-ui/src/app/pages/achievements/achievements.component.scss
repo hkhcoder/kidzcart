@@ -1,0 +1,336 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;0,9..40,800&family=Nunito:wght@400;600;700;800;900&display=swap');
+
+:host {
+  display: block;
+  font-family: 'DM Sans', 'Nunito', system-ui, sans-serif;
+  margin: -2rem -1.5rem -3rem;
+  padding: 0 1.5rem 3rem;
+  background: #fafafa;
+  min-height: calc(100vh - 80px);
+}
+
+@media (max-width: 768px) {
+  :host {
+    margin: -1.5rem -1rem -2rem;
+    padding: 0 1rem 2rem;
+  }
+}
+
+.achievements-page {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.module {
+  border-radius: 22px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 32px rgba(15, 23, 42, 0.07);
+  padding: 1.5rem 1.5rem;
+  margin-bottom: 1rem;
+  background: #fff;
+}
+
+.hero-module {
+  background: #fafafa;
+  border: 1px solid #e5e5e5;
+  margin-top: 0.35rem;
+  padding: 1.75rem 1.5rem;
+}
+
+.hero-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.hero-copy {
+  flex: 1;
+  min-width: 220px;
+}
+
+.hero-kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #525252;
+}
+
+.hero-title {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.6rem, 4vw, 2rem);
+  font-weight: 900;
+  color: #1a1a2e;
+  letter-spacing: -0.03em;
+}
+
+.hero-lead {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: #64748b;
+  line-height: 1.5;
+  max-width: 420px;
+}
+
+.hero-art {
+  flex: 0 0 auto;
+  width: min(220px, 42vw);
+  aspect-ratio: 4 / 3;
+  max-height: 200px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #fff;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.07);
+  display: block;
+  filter: drop-shadow(0 12px 28px rgba(46, 49, 190, 0.12));
+}
+
+.hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  border-radius: 0;
+}
+
+.status-banner {
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: #fff1f2;
+  color: #9f1239;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.cert-module {
+  background: linear-gradient(135deg, rgba(253, 230, 138, 0.35), #fff);
+  border: 2px solid rgba(234, 179, 8, 0.35);
+}
+
+.cert-frame {
+  text-align: center;
+  padding: 0.5rem 0.25rem 0.25rem;
+  position: relative;
+}
+
+.cert-id {
+  margin: 0 0 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  text-align: right;
+}
+
+.cert-ribbon {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+  color: #ca8a04;
+}
+
+.cert-subtitle {
+  margin: 0 0 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.04em;
+}
+
+.cert-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #1a1a2e;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.cert-presented {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: #94a3b8;
+}
+
+.cert-recipient {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--ink, #312e81);
+}
+
+.cert-body {
+  margin: 0 0 1rem;
+  font-size: 1.02rem;
+  line-height: 1.55;
+  color: #475569;
+  max-width: 560px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cert-stats {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  color: #334155;
+  font-weight: 600;
+}
+
+.cert-stats strong {
+  color: #059669;
+}
+
+.cert-footer-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding-top: 1rem;
+  margin-bottom: 1rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.35);
+  text-align: left;
+}
+
+.cert-issuer-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.cert-issuer {
+  font-weight: 900;
+  font-size: 0.95rem;
+  color: #1e293b;
+}
+
+.cert-quote {
+  font-size: 0.78rem;
+  font-style: italic;
+  color: #94a3b8;
+}
+
+.cert-meta {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  font-weight: 600;
+  text-align: right;
+}
+
+.cert-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.btn-cert-download {
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 900;
+  padding: 0.55rem 1.25rem;
+  border-radius: 999px;
+  border: 2px solid var(--highlight, #002b49);
+  background: var(--btn-surface);
+  color: var(--btn-on-surface);
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  transition: transform 0.15s, box-shadow 0.2s;
+}
+
+.btn-cert-download:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+
+.btn-cert-download:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.cert-download-hint {
+  font-size: 0.78rem;
+  color: #64748b;
+  max-width: 280px;
+  line-height: 1.35;
+}
+
+.block-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: #1a1a2e;
+}
+
+.title-emoji {
+  margin-right: 0.35rem;
+}
+
+.block-hint {
+  margin: 0 0 1rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.item-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.item-card {
+  border-radius: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  padding: 1rem 1.1rem;
+  margin-bottom: 0.65rem;
+  background: #fafbff;
+}
+
+.item-card--mint {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.35rem;
+}
+
+.item-name {
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.status-pill {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #059669;
+  background: rgba(16, 185, 129, 0.12);
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+}
+
+.item-detail {
+  margin: 0.15rem 0 0;
+  font-size: 0.92rem;
+}
+
+.muted-line {
+  color: #64748b;
+}

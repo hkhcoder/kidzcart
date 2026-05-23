@@ -1,0 +1,41 @@
+<div class="detail-page">
+  <div *ngIf="loading" class="module status-module">Loading something fun… ✨</div>
+
+  <div *ngIf="!loading && error" class="module error-module" role="alert">{{ error }}</div>
+
+  <ng-container *ngIf="!loading && product">
+    <section class="module hero-module">
+      <div class="hero-row">
+        <div class="cover-wrap">
+          <img class="cover-img" [src]="productImage(product)" [alt]="product.name" />
+        </div>
+        <div class="hero-copy">
+          <p class="hero-kicker">{{ categoryKicker(product) }}</p>
+          <h1 class="product-title">{{ product.name }}</h1>
+          <p class="product-tagline">{{ taglineFor(product) }}</p>
+          <div class="price-row">
+            <span class="price-big">₹ {{ product.price }}</span>
+            <span class="cat-chip">{{ product.category }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="module info-module" *ngIf="product.description">
+      <h2 class="section-label">About this item</h2>
+      <p class="desc-text">{{ product.description }}</p>
+    </section>
+
+    <section class="module action-module">
+      <h2 class="section-label">Add to your cart</h2>
+      <div class="action-row">
+        <div class="qty-box">
+          <label for="qty">How many?</label>
+          <input id="qty" type="number" min="1" [(ngModel)]="qty" class="qty-input" />
+        </div>
+        <button type="button" class="btn-add" (click)="add()">Add to cart 🛒</button>
+        <a routerLink="/cart" class="btn-ghost-link">See my cart</a>
+      </div>
+    </section>
+  </ng-container>
+</div>

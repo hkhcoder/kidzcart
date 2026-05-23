@@ -1,0 +1,67 @@
+<div class="achievements-page">
+  <section class="module hero-module" aria-labelledby="achievements-hero-title">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="hero-kicker">You did it 🌟</p>
+        <h1 id="achievements-hero-title" class="hero-title">Achievements</h1>
+        <p class="hero-lead">Your donations and a little certificate to say thank you.</p>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <img src="assets/icons/Success.jpg" alt="" class="hero-img" />
+      </div>
+    </div>
+  </section>
+
+  <div *ngIf="loading" class="status-banner">Loading…</div>
+  <div *ngIf="error" class="status-banner" role="alert">{{ error }}</div>
+
+  <section *ngIf="data?.certificate" class="module cert-module" aria-labelledby="cert-title">
+    <div class="cert-frame">
+      <p class="cert-id" *ngIf="data!.certificate.certificateId">No. {{ data!.certificate.certificateId }}</p>
+      <p class="cert-ribbon" aria-hidden="true">✦</p>
+      <p class="cert-subtitle">{{ data!.certificate.subtitle }}</p>
+      <h2 id="cert-title" class="cert-title">{{ data!.certificate.title }}</h2>
+      <p class="cert-presented">Presented to</p>
+      <p class="cert-recipient">{{ data!.certificate.recipientName }}</p>
+      <p class="cert-body">{{ data!.certificate.body }}</p>
+      <p class="cert-stats" *ngIf="data!.certificate.donationCount !== undefined">
+        Recorded donations: <strong>{{ data!.certificate.donationCount }}</strong>
+      </p>
+      <div class="cert-footer-row">
+        <div class="cert-issuer-block">
+          <span class="cert-issuer">{{ data!.certificate.issuerName }}</span>
+          <span class="cert-quote">{{ data!.certificate.quote }}</span>
+        </div>
+        <p class="cert-meta">Issued {{ data!.certificate.issuedAtDisplay || (data!.certificate.issuedAt | date: 'medium') }}</p>
+      </div>
+      <div class="cert-actions">
+        <button
+          type="button"
+          class="btn-cert-download"
+          (click)="downloadCertificate()"
+          [disabled]="downloading"
+        >
+          {{ downloading ? 'Preparing…' : 'Download certificate' }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section *ngIf="data" class="module block-module" aria-labelledby="donations-heading">
+    <h2 id="donations-heading" class="block-title">
+      <span class="title-emoji" aria-hidden="true">💚</span> Your donations
+    </h2>
+    <p class="block-hint" *ngIf="!data.donations.length">No donations yet — head to Donate when you are ready!</p>
+
+    <ul class="item-list" *ngIf="data.donations.length">
+      <li *ngFor="let d of data.donations" class="item-card item-card--mint">
+        <div class="item-top">
+          <span class="item-name">Donation #{{ d.id }}</span>
+          <span class="status-pill">{{ d.status }}</span>
+        </div>
+        <p class="item-detail muted-line">Items: {{ donationItemsLabel(d) }}</p>
+        <p class="item-detail muted-line">{{ d.createdAt }}</p>
+      </li>
+    </ul>
+  </section>
+</div>

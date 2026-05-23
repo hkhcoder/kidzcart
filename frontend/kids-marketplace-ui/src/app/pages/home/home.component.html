@@ -1,0 +1,230 @@
+<div class="home-page ed-home kz-home">
+  <!-- Subtle confetti burst (respects reduced motion in TS) -->
+  <div class="kz-confetti" *ngIf="confettiActive" aria-hidden="true">
+    <span *ngFor="let i of confettiIndices" class="kz-confetti__bit" [style.--kz-delay]="(i * 45) + 'ms'" [style.--kz-x]="(i * 7 % 100) + '%'"></span>
+  </div>
+
+  <section class="ed-hero" aria-label="Featured collection banner">
+    <div
+      class="ed-hero__carousel"
+      role="region"
+      aria-roledescription="carousel"
+      aria-label="Featured promotions"
+    >
+      <div
+        class="ed-hero__viewport"
+        (mouseenter)="pauseHero()"
+        (mouseleave)="resumeHero()"
+        id="home-hero-panel"
+      >
+        <a
+          *ngFor="let slide of heroSlides; let i = index"
+          [routerLink]="slide.routerLink"
+          [queryParams]="slide.queryParams || {}"
+          class="ed-hero__link ed-hero__slide"
+          [class.ed-hero__slide--active]="i === heroIndex"
+          [attr.aria-hidden]="i === heroIndex ? 'false' : 'true'"
+          [attr.tabindex]="i === heroIndex ? 0 : -1"
+          [attr.id]="'hero-slide-link-' + i"
+        >
+          <img [src]="slide.src" [alt]="slide.alt" width="1600" height="520" loading="eager" />
+        </a>
+      </div>
+
+      <div class="ed-hero__dots" role="tablist" aria-label="Choose promotion slide">
+        <button
+          *ngFor="let slide of heroSlides; let i = index"
+          type="button"
+          class="ed-hero__dot"
+          role="tab"
+          [attr.aria-selected]="i === heroIndex"
+          [attr.aria-controls]="'home-hero-panel'"
+          [attr.aria-label]="'Slide ' + (i + 1) + ' of ' + heroSlides.length + ': ' + slide.alt"
+          [attr.tabindex]="i === heroIndex ? 0 : -1"
+          (click)="goToSlide(i)"
+          (keydown)="onDotsKeydown($event, i)"
+        ></button>
+      </div>
+    </div>
+  </section>
+
+  <div class="rack ed-home__rack">
+    <div class="kz-tip-row" *ngIf="currentTip">
+      <div class="kz-tip" role="status">
+        <span class="kz-tip__icon" aria-hidden="true">✨</span>
+        <p class="kz-tip__text">{{ currentTip }}</p>
+      </div>
+    </div>
+
+    <section class="kz-shop-cats" id="shop-cats" aria-labelledby="shop-cats-title">
+      <h2 id="shop-cats-title" class="kz-shop-cats__heading">Shop by category</h2>
+
+      <div class="kz-chips" role="tablist" aria-label="Filter categories">
+        <button
+          type="button"
+          class="kz-chip"
+          role="tab"
+          [attr.aria-selected]="selectedChip === 'all'"
+          (click)="selectChip('all')"
+        >
+          All
+        </button>
+        <button
+          type="button"
+          class="kz-chip"
+          role="tab"
+          [attr.aria-selected]="selectedChip === 'books'"
+          (click)="selectChip('books')"
+        >
+          Books
+        </button>
+        <button
+          type="button"
+          class="kz-chip"
+          role="tab"
+          [attr.aria-selected]="selectedChip === 'clothes'"
+          (click)="selectChip('clothes')"
+        >
+          Clothes
+        </button>
+        <button
+          type="button"
+          class="kz-chip"
+          role="tab"
+          [attr.aria-selected]="selectedChip === 'toys'"
+          (click)="selectChip('toys')"
+        >
+          Toys
+        </button>
+      </div>
+
+      <div class="kz-shop-cats__grid">
+        <a
+          *ngFor="let c of shopCategoryTiles"
+          [id]="'shop-cat-' + c.id"
+          [routerLink]="c.routerLink"
+          [queryParams]="c.queryParams || {}"
+          class="kz-cat-tile"
+          [class.kz-cat-tile--highlight]="selectedChip !== 'all' && selectedChip === c.id"
+          (click)="onCategoryTileActivate(c.id)"
+        >
+          <div class="kz-cat-tile__img">
+            <span
+              *ngIf="c.ribbon"
+              class="kz-cat-ribbon"
+              [class.kz-cat-ribbon--sale]="c.ribbon.kind === 'sale'"
+              [class.kz-cat-ribbon--pulse]="true"
+            >
+              {{ c.ribbon.label }}
+            </span>
+            <img [src]="c.imageSrc" [alt]="c.title" width="400" height="400" loading="lazy" />
+          </div>
+          <span class="kz-cat-tile__label">{{ c.title }}</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="kz-faq" aria-labelledby="kz-faq-title">
+      <h2 id="kz-faq-title" class="kz-faq__title">Why KidzCart?</h2>
+      <p class="kz-faq__lead">Quick answers — tap a question to read more.</p>
+      <div class="kz-faq__list">
+        <div *ngFor="let f of faqs" class="kz-faq__item">
+          <h3 class="kz-faq__heading">
+            <button
+              type="button"
+              class="kz-faq__trigger"
+              [attr.aria-expanded]="openFaqId === f.id"
+              [attr.aria-controls]="'faq-panel-' + f.id"
+              [id]="'faq-trigger-' + f.id"
+              (click)="toggleFaq(f.id)"
+            >
+              <span>{{ f.question }}</span>
+              <span class="kz-faq__chev" aria-hidden="true">{{ openFaqId === f.id ? '−' : '+' }}</span>
+            </button>
+          </h3>
+          <div
+            class="kz-faq__panel"
+            role="region"
+            [attr.id]="'faq-panel-' + f.id"
+            [attr.aria-labelledby]="'faq-trigger-' + f.id"
+            [hidden]="openFaqId !== f.id"
+          >
+            <p>{{ f.answer }}</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="kz-play" aria-labelledby="kz-play-title">
+      <div class="kz-play__head">
+        <h2 id="kz-play-title" class="kz-play__title">Movement &amp; play</h2>
+        <p class="kz-play__sub">Tap or click the bubbles to pop them — works great on touch screens.</p>
+        <p class="kz-play__score" *ngIf="bubblePopCount > 0" aria-live="polite">Pops: {{ bubblePopCount }}</p>
+      </div>
+      <div
+        class="kz-play__field"
+        [class.kz-play__field--still]="reduceMotionPlay"
+        role="application"
+        aria-label="Bubble pop. Tap each bubble to pop it."
+      >
+        <button
+          *ngFor="let b of playBubbles; trackBy: trackBubbleId"
+          type="button"
+          class="kz-play__bubble"
+          [class.kz-play__bubble--pop]="isBubblePopping(b.id)"
+          [class.kz-play__bubble--float]="!reduceMotionPlay"
+          [style.left.%]="b.leftPct"
+          [style.top.%]="b.topPct"
+          [style.width.px]="b.size"
+          [style.height.px]="b.size"
+          [style.--bubble-color]="b.color"
+          [style.animation-delay]="(b.delay || 0) + 'ms'"
+          (click)="popBubble(b.id)"
+          (keyup.enter)="popBubble(b.id)"
+          (keyup.space)="popBubble(b.id); $event.preventDefault()"
+          aria-label="Pop bubble"
+        ></button>
+      </div>
+      <div class="kz-play__footer">
+        <button type="button" class="kz-play__reset" (click)="resetPlayBubbles()">New bubbles</button>
+      </div>
+    </section>
+
+    <section class="kz-reviews" aria-labelledby="kz-reviews-title">
+      <div class="kz-reviews__head">
+        <h2 id="kz-reviews-title" class="kz-reviews__title">What families are saying</h2>
+        <p class="kz-reviews__sub">Real reviews from happy parents and little explorers.</p>
+      </div>
+      <div class="kz-reviews__panel" (mouseenter)="pauseReviewRotation()" (mouseleave)="resumeReviewRotation()">
+        <div class="kz-reviews__grid">
+          <article *ngIf="currentReview" class="kz-review-card">
+            <div class="kz-review-card__rating" [attr.aria-label]="'Rated ' + currentReview.rating + ' out of 5 stars'">
+              {{ getStars(currentReview.rating) }}
+            </div>
+            <p class="kz-review-card__quote" aria-live="polite">“{{ currentReview.quote }}”</p>
+            <div class="kz-review-card__meta">
+              <span class="kz-review-card__name">{{ currentReview.name }}</span>
+              <span class="kz-review-card__role">{{ currentReview.title }}</span>
+            </div>
+            <span class="kz-review-card__source">{{ currentReview.source }}</span>
+          </article>
+        </div>
+      </div>
+      <div class="kz-reviews__dots" role="tablist" aria-label="Review navigation">
+        <button
+          *ngFor="let review of customerReviews; let i = index"
+          type="button"
+          class="kz-review-dot"
+          role="tab"
+          [attr.aria-selected]="i === reviewIndex"
+          [attr.aria-label]="'Review ' + (i + 1) + ' of ' + customerReviews.length"
+          [class.kz-review-dot--active]="i === reviewIndex"
+          (click)="selectReview(i)"
+        ></button>
+      </div>
+    </section>
+
+    <app-trust-strip></app-trust-strip>
+    <app-site-footer></app-site-footer>
+  </div>
+</div>

@@ -1,0 +1,125 @@
+<div class="about-page">
+  <!-- Hero module -->
+  <section class="module hero-module" aria-labelledby="about-title">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="hero-kicker">Hi there! 👋</p>
+        <h1 id="about-title" class="hero-title">This is KidzCart</h1>
+        <p class="hero-lead">
+          A happy little corner of the internet where families find books, toys, and clothes — and share smiles with other kids, too.
+        </p>
+        <ul class="hero-bullets" aria-label="What makes us special">
+          <li><span class="bullet-ico" aria-hidden="true">📚</span> Pre-loved treasures</li>
+          <li><span class="bullet-ico" aria-hidden="true">🎁</span> Give &amp; get</li>
+          <li><span class="bullet-ico" aria-hidden="true">🌈</span> Made for families</li>
+        </ul>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <img src="assets/icons/aboutus.jpg" alt="" class="hero-img" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick sparkle strip -->
+  <section class="module sparkle-module" aria-label="Fun facts">
+    <div class="sparkle-row">
+      <div class="sparkle-pill"><span class="sparkle-emoji">✨</span> Easy to browse</div>
+      <div class="sparkle-pill"><span class="sparkle-emoji">🧸</span> Toys with stories</div>
+      <div class="sparkle-pill"><span class="sparkle-emoji">👕</span> Comfy clothes</div>
+      <div class="sparkle-pill"><span class="sparkle-emoji">💚</span> Kind to the planet</div>
+    </div>
+  </section>
+
+  <!-- Three story cards -->
+  <section class="module" aria-labelledby="three-things-title">
+    <h2 id="three-things-title" class="section-heading">Three big ideas</h2>
+    <p class="section-sub">Tiny modules, one friendly story — tap a card to read the idea.</p>
+    <div class="idea-grid">
+      <article class="idea-card idea-shop">
+        <div class="idea-icon-wrap" aria-hidden="true">🛒</div>
+        <h3 class="idea-title">Shop &amp; smile</h3>
+        <p class="idea-text">
+          Pick books to read aloud, toys for playtime, or outfits for sunny days. Everything is organized so grown-ups and kids can explore together.
+        </p>
+      </article>
+      <article class="idea-card idea-share">
+        <div class="idea-icon-wrap" aria-hidden="true">🤝</div>
+        <h3 class="idea-title">Share the joy</h3>
+        <p class="idea-text">
+          When you donate something you’ve outgrown, another child might discover a new favorite story or toy. Sharing feels good!
+        </p>
+      </article>
+      <article class="idea-card idea-earth">
+        <div class="idea-icon-wrap" aria-hidden="true">🌍</div>
+        <h3 class="idea-title">Planet pals</h3>
+        <p class="idea-text">
+          Giving items a second home means less waste. Small steps help our Earth stay green and clean for everyone’s future.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="module steps-module" aria-labelledby="steps-title">
+    <h2 id="steps-title" class="section-heading">How it works</h2>
+    <p class="section-sub">Four quick steps — you’ve got this!</p>
+    <ol class="steps-list">
+      <li class="step-card">
+        <span class="step-num">1</span>
+        <div class="step-body">
+          <span class="step-title">Look around</span>
+          <span class="step-desc">Open Books, Cart, or Donate from the top menu and see what’s there.</span>
+        </div>
+      </li>
+      <li class="step-card">
+        <span class="step-num">2</span>
+        <div class="step-body">
+          <span class="step-title">Fill your cart</span>
+          <span class="step-desc">Tap “Add to cart” on things your family loves.</span>
+        </div>
+      </li>
+      <li class="step-card">
+        <span class="step-num">3</span>
+        <div class="step-body">
+          <span class="step-title">Check out</span>
+          <span class="step-desc">Review your list with a grown-up and finish your order (it’s a pretend checkout for learning!).</span>
+        </div>
+      </li>
+      <li class="step-card">
+        <span class="step-num">4</span>
+        <div class="step-body">
+          <span class="step-title">Donate &amp; cheer</span>
+          <span class="step-desc">Share items you’re done with — you might even earn a thank-you surprise.</span>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- Safety / grown-ups -->
+  <section class="module trust-module" aria-labelledby="trust-title">
+    <div class="trust-inner">
+      <div class="trust-icon" aria-hidden="true">🛡️</div>
+      <div class="trust-copy">
+        <h2 id="trust-title" class="trust-heading">Grown-ups &amp; safety</h2>
+        <p class="trust-text">
+          KidzCart is built for learning. Use a strong password with a parent or guardian, and ask for help if something looks odd.
+          Shopping here is a team adventure — grown-ups make the big decisions; kids bring the curiosity and kindness.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA module -->
+  <section class="module cta-module" aria-label="Get started">
+    <div class="cta-inner">
+      <div class="cta-copy">
+        <h2 class="cta-title">Ready to explore?</h2>
+        <p class="cta-sub">Jump into books, toys, and clothes — your next favorite find might be one click away.</p>
+      </div>
+      <div class="cta-actions">
+        <a routerLink="/products" [queryParams]="{ category: 'books' }" class="btn-cta primary">Browse books</a>
+        <a routerLink="/" class="btn-cta ghost">Back to home</a>
+      </div>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,27 @@
+/* App shell — navbar styles live in NavbarComponent */
+:host {
+  --page-bg: var(--bg, #fffaf9);
+}
+
+.kids-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--page-bg);
+}
+
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
+  width: 100%;
+  flex: 1;
+  /* Content column reads as one “stack” on the dotted canvas */
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 1.5rem 1rem 2rem;
+  }
+}

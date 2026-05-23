@@ -1,0 +1,132 @@
+<div class="auth-container">
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <h2 class="auth-title">
+        {{ mode === 'login' ? 'Welcome back! 👋' : 'Join us today! 🎉' }}
+      </h2>
+      <p class="auth-subtitle">
+        {{
+          mode === 'login'
+            ? 'Login to buy or donate items for kids.'
+            : 'Create your account and start making a difference.'
+        }}
+      </p>
+
+      <div class="tabs">
+        <button
+          type="button"
+          class="tab"
+          [class.active]="mode === 'login'"
+          (click)="switchMode('login')"
+        >
+          🔑 Login
+        </button>
+        <button
+          type="button"
+          class="tab"
+          [class.active]="mode === 'signup'"
+          (click)="switchMode('signup')"
+        >
+          ✨ Sign Up
+        </button>
+      </div>
+
+      <form class="form-group" [formGroup]="authForm" (ngSubmit)="submit()" novalidate>
+        <div *ngIf="mode === 'signup'" class="field">
+          <label for="name">Full Name</label>
+          <div class="input-wrap" [class.input-wrap--invalid]="showFieldError('name')">
+            <span class="input-icon">👤</span>
+            <input
+              id="name"
+              type="text"
+              formControlName="name"
+              placeholder="Your full name"
+              autocomplete="name"
+              [attr.aria-invalid]="showFieldError('name')"
+            />
+          </div>
+          <p class="field-hint" *ngIf="mode === 'signup' && !showFieldError('name')">
+            2–100 characters.
+          </p>
+          <p class="field-error" *ngIf="showFieldError('name')" role="alert">
+            {{ fieldMessage('name') }}
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="email">Email Address</label>
+          <div class="input-wrap" [class.input-wrap--invalid]="showFieldError('email')">
+            <span class="input-icon">📧</span>
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              placeholder="you@example.com"
+              autocomplete="email"
+              [attr.aria-invalid]="showFieldError('email')"
+            />
+          </div>
+          <p class="field-error" *ngIf="showFieldError('email')" role="alert">
+            {{ fieldMessage('email') }}
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="input-wrap" [class.input-wrap--invalid]="showFieldError('password')">
+            <span class="input-icon">🔒</span>
+            <input
+              id="password"
+              type="password"
+              formControlName="password"
+              placeholder="••••••••"
+              [attr.autocomplete]="mode === 'signup' ? 'new-password' : 'current-password'"
+              [attr.aria-invalid]="showFieldError('password')"
+            />
+          </div>
+          <p class="field-hint" *ngIf="mode === 'signup' && !showFieldError('password')">
+            At least 8 characters for new accounts.
+          </p>
+          <p class="field-error" *ngIf="showFieldError('password')" role="alert">
+            {{ fieldMessage('password') }}
+          </p>
+        </div>
+
+        <div *ngIf="error" class="error-msg" role="alert">⚠️ {{ error }}</div>
+
+        <button
+          type="submit"
+          class="btn-submit"
+          [disabled]="loading"
+          [attr.aria-busy]="loading"
+        >
+          <span *ngIf="loading" class="spinner"></span>
+          <span>
+            {{
+              loading
+                ? 'Please wait...'
+                : mode === 'login'
+                  ? 'Login to Account'
+                  : 'Create Account'
+            }}
+          </span>
+        </button>
+      </form>
+
+      <p class="auth-footer">
+        <ng-container *ngIf="mode === 'login'">
+          Don't have an account?
+          <button type="button" class="link-btn" (click)="switchMode('signup')">
+            Sign up free
+          </button>
+        </ng-container>
+        <ng-container *ngIf="mode === 'signup'">
+          Already have an account?
+          <button type="button" class="link-btn" (click)="switchMode('login')">
+            Login here
+          </button>
+        </ng-container>
+      </p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,162 @@
+<div class="products-page">
+  <!-- Hero module -->
+  <section class="module hero-module" aria-labelledby="products-hero-title">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="hero-kicker">KidzCart · Shop</p>
+        <h1 id="products-hero-title" class="hero-title">{{ categoryTitle }}</h1>
+        <p class="hero-sub">{{ heroSubtitle }}</p>
+        <div class="hero-chips">
+          <span class="chip" *ngFor="let tag of heroTags">{{ tag }}</span>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <img [src]="heroImage" alt="" class="hero-img" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Category switcher (modular strip like home) -->
+  <section class="module category-module" aria-label="Product category">
+    <h2 class="module-title">Browse by category</h2>
+    <div class="category-strip">
+      <button
+        type="button"
+        class="cat-tile"
+        [class.active]="category === 'books'"
+        (click)="goCategory('books')"
+      >
+        <img src="assets/banners/53.jpg" alt="" class="cat-tile-icon" />
+        <span>Books</span>
+      </button>
+      <button
+        type="button"
+        class="cat-tile"
+        [class.active]="category === 'toys'"
+        (click)="goCategory('toys')"
+      >
+        <img src="assets/banners/54.jpg" alt="" class="cat-tile-icon" />
+        <span>Toys</span>
+      </button>
+      <button
+        type="button"
+        class="cat-tile"
+        [class.active]="category === 'clothes'"
+        (click)="goCategory('clothes')"
+      >
+        <img src="assets/banners/60.jpg" alt="" class="cat-tile-icon" />
+        <span>Clothes</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Filters + search module -->
+  <section class="module filters-module">
+    <div class="tabs-row" *ngIf="category === 'books'" role="tablist" aria-label="Book type">
+    </div>
+    <p class="category-hint">
+      Showing {{ categoryTitle.toLowerCase() }} — use search to narrow the list.
+    </p>
+
+    <div class="search-panel">
+      <div class="search-field">
+        <label for="search-products">Search</label>
+        <div class="search-input-wrap">
+          <span class="search-glyph" aria-hidden="true">🔎</span>
+          <input
+            id="search-products"
+            type="text"
+            [(ngModel)]="q"
+            (ngModelChange)="onSearchInput($event)"
+            (keyup.enter)="applySearch()"
+            placeholder="Try a title or keyword…"
+            class="search-input"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+      <button type="button" class="btn-search" (click)="applySearch()">Search</button>
+    </div>
+  </section>
+
+  <!-- Status -->
+  <div *ngIf="error" class="status-banner error" role="alert">{{ error }}</div>
+  <div *ngIf="loading" class="status-banner loading">Loading products…</div>
+
+  <!-- Sidebar sort + product grid -->
+  <div class="shop-browse" *ngIf="!loading && productsList.length > 0">
+    <aside class="shop-sidebar" aria-label="Sort and filter">
+      <div class="sidebar-card">
+        <h3 class="sidebar-title">Sort</h3>
+        <p class="sidebar-hint">Order this list</p>
+        <div class="sort-options" role="group" aria-label="Sort products">
+          <button
+            type="button"
+            class="sort-btn"
+            [class.active]="sortBy === 'default'"
+            (click)="setSort('default')"
+          >
+            Default order
+          </button>
+          <button
+            type="button"
+            class="sort-btn"
+            [class.active]="sortBy === 'price-asc'"
+            (click)="setSort('price-asc')"
+          >
+            Price · Low → high
+          </button>
+          <button
+            type="button"
+            class="sort-btn"
+            [class.active]="sortBy === 'price-desc'"
+            (click)="setSort('price-desc')"
+          >
+            Price · High → low
+          </button>
+          <button
+            type="button"
+            class="sort-btn"
+            [class.active]="sortBy === 'name-asc'"
+            (click)="setSort('name-asc')"
+          >
+            Name · A to Z
+          </button>
+          <button
+            type="button"
+            class="sort-btn"
+            [class.active]="sortBy === 'name-desc'"
+            (click)="setSort('name-desc')"
+          >
+            Name · Z to A
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="shop-main">
+      <section class="module grid-module">
+        <div class="grid-toolbar">
+          <span class="result-count">
+            {{ sortedProducts.length }} {{ sortedProducts.length === 1 ? 'item' : 'items' }}
+          </span>
+        </div>
+        <h2 class="module-title visually-hidden">Products</h2>
+        <div class="product-grid">
+          <app-product-card
+            *ngFor="let product of sortedProducts"
+            [product]="product"
+            (addToCart)="onAddToCart($event)"
+          ></app-product-card>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <section class="module empty-module" *ngIf="!loading && productsList.length === 0 && !error">
+    <img src="assets/illustrations/cart-empty.svg" alt="" class="empty-illustration" />
+    <p class="empty-title">No matches yet</p>
+    <p class="empty-desc">Try another keyword or pick a different category above.</p>
+    <button type="button" class="btn-outline" (click)="goCategory('books')">Back to books</button>
+  </section>
+</div>

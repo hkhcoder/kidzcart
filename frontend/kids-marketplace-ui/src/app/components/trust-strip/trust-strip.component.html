@@ -1,0 +1,14 @@
+<section class="trust-strip" aria-labelledby="trust-strip-title">
+  <div class="trust-strip__inner">
+    <h2 id="trust-strip-title" class="trust-strip__heading">Happy shopping guaranteed</h2>
+    <div class="trust-strip__grid">
+      <div *ngFor="let it of items" class="trust-strip__card">
+        <div class="trust-strip__img-wrap">
+          <img [src]="it.image" [alt]="it.title" width="120" height="120" loading="lazy" decoding="async" />
+        </div>
+        <h3 class="trust-strip__title">{{ it.title }}</h3>
+        <p class="trust-strip__sub">{{ it.sub }}</p>
+      </div>
+    </div>
+  </div>
+</section>

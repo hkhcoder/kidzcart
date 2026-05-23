@@ -1,0 +1,30 @@
+{
+  "name": "product-donation-service",
+  "version": "1.0.0",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "concurrently -n server,coupon,notify -c blue,green,magenta \"nodemon src/server.js\" \"node src/workers/couponWorker.js\" \"node src/workers/notificationWorker.js\"",
+    "start": "concurrently -n server,coupon,notify -c blue,green,magenta \"node src/server.js\" \"node src/workers/couponWorker.js\" \"node src/workers/notificationWorker.js\"",
+    "start:server": "node src/server.js",
+    "worker:coupon": "node src/workers/couponWorker.js",
+    "worker:notification": "node src/workers/notificationWorker.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "amqplib": "^0.10.5",
+    "http-proxy": "^1.18.1",
+    "ioredis": "^5.4.2",
+    "mongoose": "^8.23.0",
+    "morgan": "^1.10.1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "nodemon": "^3.1.14"
+  }
+}

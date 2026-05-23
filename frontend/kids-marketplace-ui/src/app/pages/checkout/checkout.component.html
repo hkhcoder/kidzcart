@@ -1,0 +1,72 @@
+<div class="checkout-page">
+  <section class="module hero-module" aria-labelledby="checkout-title">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="hero-kicker">Almost there! 🎈</p>
+        <h1 id="checkout-title" class="hero-title">Checkout</h1>
+        <p class="hero-lead">Peek at your totals, add a coupon if you have one, then place your pretend order with a grown-up nearby.</p>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <img src="assets/illustrations/cart-hero.svg" alt="" class="hero-img" />
+      </div>
+    </div>
+  </section>
+
+  <a routerLink="/cart" class="back-link">← Back to cart</a>
+
+  <div *ngIf="items.length === 0" class="module empty-module">
+    <p class="empty-text">Your cart is empty — add something fun first!</p>
+    <a routerLink="/products" [queryParams]="{ category: 'books' }" class="btn-go">Browse books 📚</a>
+  </div>
+
+  <div *ngIf="items.length > 0" class="checkout-stack">
+    <section class="module summary-card">
+      <h2 class="block-title">Your totals</h2>
+      <div class="totals-row">
+        <div>
+          <span class="totals-label">Subtotal</span>
+          <span class="totals-value">₹ {{ subtotal }}</span>
+        </div>
+        <div class="totals-discount">
+          <span class="totals-label">You save</span>
+          <span class="totals-value totals-value--green">₹ {{ estimatedDiscount }}</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="module coupon-card">
+      <h2 class="block-title"><span aria-hidden="true">🎟️</span> Got a coupon?</h2>
+      <p class="block-hint">Type your code and tap Apply — watch the numbers dance.</p>
+      <div class="coupon-row">
+        <div class="coupon-input-wrap">
+          <label for="couponCode" class="sr-only">Coupon code</label>
+          <input
+            id="couponCode"
+            type="text"
+            [(ngModel)]="couponCode"
+            placeholder="e.g. SAVE10"
+            class="input-kids"
+          />
+          <p *ngIf="validation" class="validation-line">
+            {{ validation.valid ? '✅ Looks good!' : 'Hmm…' }} — {{ validation.reason }}
+          </p>
+          <p *ngIf="couponError" class="error-line">{{ couponError }}</p>
+        </div>
+        <button type="button" class="btn-apply" (click)="validate()">Apply</button>
+      </div>
+    </section>
+
+    <section class="module total-card">
+      <div class="grand-row">
+        <div>
+          <span class="grand-label">Total today</span>
+          <span class="grand-amount">₹ {{ total }}</span>
+        </div>
+        <button type="button" class="btn-place" (click)="pay()" [disabled]="paying">
+          {{ paying ? 'Working… ⏳' : 'Place order 🎉' }}
+        </button>
+      </div>
+      <p *ngIf="error" class="error-line error-line--block">{{ error }}</p>
+    </section>
+  </div>
+</div>

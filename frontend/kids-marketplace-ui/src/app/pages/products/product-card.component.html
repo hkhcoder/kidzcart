@@ -1,0 +1,55 @@
+<article
+  class="product-card"
+  [attr.data-category]="product.category"
+  [attr.aria-label]="product.name + ', ' + categoryLabel()"
+>
+  <!-- Media block -->
+  <div class="product-card__media">
+    <span class="product-card__badge">{{ categoryLabel() }}</span>
+    <div class="product-card__image-frame">
+      <img
+        [src]="getProductImage()"
+        [alt]="product.name"
+        class="product-card__image"
+        loading="lazy"
+      />
+    </div>
+    <div class="product-card__media-shine" aria-hidden="true"></div>
+  </div>
+
+  <!-- Content block -->
+  <div class="product-card__body">
+    <h3 class="product-card__title">{{ product.name }}</h3>
+    <p class="product-card__desc" *ngIf="product.description">
+      {{ product.description }}
+    </p>
+  </div>
+
+  <!-- Footer: price module + actions -->
+  <footer class="product-card__footer">
+    <div class="product-card__price-module">
+      <span class="product-card__price-label">Price</span>
+      <span class="product-card__price">₹ {{ product.price }}</span>
+    </div>
+    <div class="product-card__actions">
+      <button
+        type="button"
+        class="product-card__btn product-card__btn--primary"
+        (click)="onAddToCart()"
+        [title]="'Add ' + product.name + ' to cart'"
+      >
+        <span class="product-card__btn-icon" aria-hidden="true">🛒</span>
+        Add to cart
+      </button>
+      <button
+        type="button"
+        class="product-card__btn product-card__btn--ghost"
+        (click)="goToDetails()"
+        [title]="'View details for ' + product.name"
+      >
+        <span class="product-card__btn-icon" aria-hidden="true">✨</span>
+        Details
+      </button>
+    </div>
+  </footer>
+</article>
