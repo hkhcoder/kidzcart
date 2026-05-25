@@ -106,13 +106,16 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
       await this.orders.checkout(payload);
 
+      // Clear the used coupon from localStorage so it doesn't auto-fill on the next order
       try {
-        if (this.couponCode.trim()) {
-          localStorage.setItem(LS_LATEST_COUPON, this.couponCode.trim());
-        }
+        localStorage.removeItem(LS_LATEST_COUPON);
       } catch {
         // ignore
       }
+
+      this.couponCode = '';
+      this.validation = null;
+      this.estimatedDiscount = 0;
 
       this.cart.clear();
       await this.router.navigate(['/profile']);

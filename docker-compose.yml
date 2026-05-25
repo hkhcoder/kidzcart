@@ -76,6 +76,8 @@ services:
     healthcheck:
       <<: *healthcheck-defaults
       test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      start_period: 120s  # extra time for seed script to complete on first boot
+      retries: 15         # 15 × 10s = 150s window after start_period
 
   redis:
     image: redis:7.4-alpine
