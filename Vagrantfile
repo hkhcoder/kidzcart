@@ -1,4 +1,13 @@
 Vagrant.configure("2") do |config|
+  # ── Architecture detection ─────────────────────────────────────────────────
+  # On Apple Silicon the host CPU will report "arm64" / "arm64e".
+  # On AMD64 Windows/Linux/Intel Mac it reports "x86_64".
+  IS_ARM = RbConfig::CONFIG["host_cpu"].downcase.start_with?("arm")
+
+  # ── Box selection ──────────────────────────────────────────────────────────
+  # bento/ubuntu-24.04 ships both amd64 and arm64 variants; Vagrant + the
+  # provider will pull the correct one automatically, so one box name works
+  # for both platforms.
   config.vm.box = "bento/ubuntu-24.04"
 
   # ── vagrant-hostmanager ────────────────────────────────────────────────────
@@ -6,25 +15,45 @@ Vagrant.configure("2") do |config|
   # hostnames (frontend, marketplace, product, achievement, infra) resolve
   # to their private network IPs automatically.
   #
-  # Install the plugin once on your host before running `vagrant up`:
-  #   vagrant plugin install vagrant-hostmanager
+  # Install the required plugin(s) once on your host before running `vagrant up`:
+  #   AMD64  →  vagrant plugin install vagrant-hostmanager
+  #   ARM64  →  vagrant plugin install vagrant-hostmanager
+  #             (VMware provider ships with Vagrant VMware Utility – install
+  #              the utility and the plugin separately; see HashiCorp docs)
   #
-  config.hostmanager.enabled      = true   # update /etc/hosts on every VM
-  config.hostmanager.manage_host  = true   # also update the host machine
-  config.hostmanager.manage_guest = true   # update every guest VM
+  config.hostmanager.enabled           = true
+  config.hostmanager.manage_host       = true
+  config.hostmanager.manage_guest      = true
   config.hostmanager.ignore_private_ip = false
   config.hostmanager.include_offline   = false
+
+  # ── Helper: apply provider block to a VM definition ───────────────────────
+  # Keeps the per-VM blocks DRY – call set_provider.(node, name, memory, cpus)
+  set_provider = lambda do |node, vm_name, memory, cpus|
+    if IS_ARM
+      node.vm.provider "vmware_desktop" do |v|
+        v.gui    = false
+        v.vmx["displayName"] = "kidzcart-#{vm_name}"
+        v.memory = memory
+        v.cpus   = cpus
+        # Required so VMware Fusion/Desktop runs a native ARM guest
+        v.vmx["guestOS"] = "arm-ubuntu-64"
+      end
+    else
+      node.vm.provider "virtualbox" do |v|
+        v.name   = "kidzcart-#{vm_name}"
+        v.memory = memory
+        v.cpus   = cpus
+      end
+    end
+  end
 
   # ── infra VM ───────────────────────────────────────────────────────────────
   # MySQL 8, MongoDB 7, Redis 7, RabbitMQ 3
   config.vm.define "infra" do |m|
     m.vm.hostname = "infra"
     m.vm.network "private_network", ip: "192.168.56.14"
-    m.vm.provider "virtualbox" do |v|
-      v.name   = "kidzcart-infra"
-      v.memory = 2048
-      v.cpus   = 2
-    end
+    set_provider.(m, "infra", 2048, 2)
     m.vm.provision "shell", path: "provision/infra.sh"
   end
 
@@ -33,11 +62,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "marketplace" do |m|
     m.vm.hostname = "marketplace"
     m.vm.network "private_network", ip: "192.168.56.11"
-    m.vm.provider "virtualbox" do |v|
-      v.name   = "kidzcart-marketplace"
-      v.memory = 1024
-      v.cpus   = 1
-    end
+    set_provider.(m, "marketplace", 1024, 1)
     m.vm.provision "shell", path: "provision/marketplace.sh"
   end
 
@@ -46,11 +71,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "product" do |m|
     m.vm.hostname = "product"
     m.vm.network "private_network", ip: "192.168.56.12"
-    m.vm.provider "virtualbox" do |v|
-      v.name   = "kidzcart-product"
-      v.memory = 768
-      v.cpus   = 1
-    end
+    set_provider.(m, "product", 768, 1)
     m.vm.provision "shell", path: "provision/product.sh"
   end
 
@@ -59,11 +80,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "achievement" do |m|
     m.vm.hostname = "achievement"
     m.vm.network "private_network", ip: "192.168.56.13"
-    m.vm.provider "virtualbox" do |v|
-      v.name   = "kidzcart-achievement"
-      v.memory = 512
-      v.cpus   = 1
-    end
+    set_provider.(m, "achievement", 512, 1)
     m.vm.provision "shell", path: "provision/achievement.sh"
   end
 
@@ -72,11 +89,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "frontend" do |m|
     m.vm.hostname = "frontend"
     m.vm.network "private_network", ip: "192.168.56.10"
-    m.vm.provider "virtualbox" do |v|
-      v.name   = "kidzcart-frontend"
-      v.memory = 512
-      v.cpus   = 1
-    end
+    set_provider.(m, "frontend", 512, 1)
     m.vm.provision "shell", path: "provision/frontend.sh"
   end
 
