@@ -39,8 +39,11 @@ server {
     index index.html;
 
     # Angular routing — serve index.html for all non-file routes
+    # Use =404 as the fallback instead of /index.html to avoid a rewrite
+    # loop when index.html itself is missing; once the dist exists this
+    # correctly falls back to index.html for all Angular routes.
     location / {
-        try_files $uri $uri/ /index.html;
+        try_files $uri $uri/ /index.html =404;
     }
 
     # /api/products  /api/donations  /api/notifications  /api/health → product VM
