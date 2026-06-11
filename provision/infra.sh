@@ -81,30 +81,59 @@ systemctl enable --now redis-server
 systemctl restart redis-server
 
 # =============================================================================
-# 4. RabbitMQ 3 (with Erlang from official RabbitMQ repos)
+# 4. RabbitMQ 3 (with Cross-Architecture Erlang Support)
 # =============================================================================
 echo "==> [infra] Installing Erlang + RabbitMQ 3"
-apt-get install -y -qq curl gnupg apt-transport-https
+apt-get install -y -qq curl gnupg apt-transport-https software-properties-common
 
-# Team RabbitMQ's signing key
-curl -1sLf "https://keys.openpgp.org/vks/v1/by-fingerprint/0A9AF2115F4687BD29803A206B73A36E6026DFCA" \
+# Detect the system architecture automatically
+SYS_ARCH=$(dpkg --print-architecture)
+
+# Import Team RabbitMQ's signing key (Directly from GitHub)
+curl -1sLf "https://github.com/rabbitmq/signing-keys/releases/download/3.0/rabbitmq-release-signing-key.asc" \
     | gpg --dearmor \
     | tee /usr/share/keyrings/com.rabbitmq.team.gpg > /dev/null
 
-# Add official RabbitMQ apt repositories (Erlang + RabbitMQ server)
-tee /etc/apt/sources.list.d/rabbitmq.list <<'EOF'
-## Modern Erlang/OTP releases
+# Purge any old, broken repository files and preference settings
+rm -f /etc/apt/sources.list.d/rabbitmq.list
+rm -f /etc/apt/preferences.d/rabbitmq
+add-apt-repository --remove -y ppa:rabbitmq/rabbitmq-erlang || true
+
+if [ "$SYS_ARCH" = "arm64" ]; then
+    echo "==> [infra] Apple Silicon / ARM64 detected. Using Launchpad Erlang-26 PPA..."
+    
+    # 1. Add RabbitMQ Server repository (Supports arm64 natively)
+    tee /etc/apt/sources.list.d/rabbitmq.list <<EOF
+deb [arch=arm64 signed-by=/usr/share/keyrings/com.rabbitmq.team.gpg] https://deb1.rabbitmq.com/rabbitmq-server/ubuntu/noble noble main
+deb [arch=arm64 signed-by=/usr/share/keyrings/com.rabbitmq.team.gpg] https://deb2.rabbitmq.com/rabbitmq-server/ubuntu/noble noble main
+EOF
+
+    # 2. Add the SPECIFIC Erlang 26 PPA which contains the required ARM64 binaries
+    add-apt-repository -y ppa:rabbitmq/rabbitmq-erlang-26
+
+    # 3. Apply Apt Pinning to guarantee PPA dominance over default Ubuntu packages
+    tee /etc/apt/preferences.d/rabbitmq <<EOF
+Package: erlang*
+Pin: release o=LP-PPA-rabbitmq-rabbitmq-erlang-26
+Pin-Priority: 1000
+EOF
+
+else
+    echo "==> [infra] Intel/AMD 64 detected. Using official RabbitMQ Cloudsmith mirrors..."
+    
+    # Standard setup for Windows/Intel laptops (Both Erlang & Server from Cloudsmith)
+    tee /etc/apt/sources.list.d/rabbitmq.list <<EOF
 deb [arch=amd64 signed-by=/usr/share/keyrings/com.rabbitmq.team.gpg] https://deb1.rabbitmq.com/rabbitmq-erlang/ubuntu/noble noble main
 deb [arch=amd64 signed-by=/usr/share/keyrings/com.rabbitmq.team.gpg] https://deb2.rabbitmq.com/rabbitmq-erlang/ubuntu/noble noble main
-
-## Latest RabbitMQ releases
 deb [arch=amd64 signed-by=/usr/share/keyrings/com.rabbitmq.team.gpg] https://deb1.rabbitmq.com/rabbitmq-server/ubuntu/noble noble main
 deb [arch=amd64 signed-by=/usr/share/keyrings/com.rabbitmq.team.gpg] https://deb2.rabbitmq.com/rabbitmq-server/ubuntu/noble noble main
 EOF
+fi
 
+# Force a clean package metadata sync
 apt-get update -qq
 
-# Install Erlang
+# Install modern Erlang
 apt-get install -y -qq \
     erlang-base erlang-asn1 erlang-crypto erlang-eldap \
     erlang-ftp erlang-inets erlang-mnesia erlang-os-mon \
@@ -123,8 +152,7 @@ rabbitmqctl add_user guest guest    || true
 rabbitmqctl set_user_tags guest administrator
 rabbitmqctl set_permissions -p / guest ".*" ".*" ".*"
 
-# RabbitMQ restricts the 'guest' user to localhost-only connections by default.
-# Create a dedicated 'admin' user for remote access (e.g. management UI from host).
+# Create dedicated 'admin' user for remote access
 rabbitmqctl add_user admin admin    || true
 rabbitmqctl set_user_tags admin administrator
 rabbitmqctl set_permissions -p / admin ".*" ".*" ".*"
