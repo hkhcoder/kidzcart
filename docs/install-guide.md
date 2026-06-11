@@ -265,11 +265,13 @@ sudo systemctl enable --now achievements
 ### 3.3 Verify
 
 ```bash
-# Kestrel direct (localhost only)
-curl http://127.0.0.1:4006/achievements
+# Kestrel direct (localhost only — internal port 5006, bypasses Nginx)
+curl http://127.0.0.1:5006/health
+# Expected: {"ok":true,"service":"achievements"}
 
-# Via Nginx (the path other VMs use)
-curl http://achievement:4006/achievements
+# Via Nginx on port 4006 (the path other VMs use)
+curl http://127.0.0.1:4006/health
+curl http://achievement:4006/health
 
 # Check logs
 sudo journalctl -u achievements -n 30
