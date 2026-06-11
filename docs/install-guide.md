@@ -262,7 +262,16 @@ The systemd unit was created by the provisioning script. Enable and start it:
 sudo systemctl enable --now achievements
 ```
 
-### 3.3 Verify
+### 3.3 Reload Nginx
+
+The provisioning script creates the Nginx site config and symlink before Kestrel
+is running. Reload Nginx so it picks up the port 4006 config:
+
+```bash
+sudo systemctl reload nginx
+```
+
+### 3.4 Verify
 
 ```bash
 # Kestrel direct (localhost only — internal port 5006, bypasses Nginx)
