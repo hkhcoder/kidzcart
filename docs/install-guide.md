@@ -2,8 +2,9 @@
 
 > **This guide covers application-level setup only.**
 > All tools (Java, Maven, Tomcat, Node.js, PM2, .NET SDK, Nginx, MySQL, MongoDB,
-> Redis, RabbitMQ) are installed and configured automatically by the Vagrant
-> provisioning scripts when you run `vagrant up`.
+> Redis, RabbitMQ) are installed by the Vagrant provisioning scripts when you run
+> `vagrant up`. Application configuration (Nginx site configs, .env files, etc.)
+> is done manually following the steps below.
 >
 > **Prerequisites:**
 > - `vagrant plugin install vagrant-hostmanager` (one-time, on your host)
@@ -36,7 +37,7 @@ flowchart TD
     B["Step 1 — marketplace VM\nBuild WAR → Deploy to Tomcat"] --> E
     C["Step 2 — product VM\nConfigure .env → Start PM2"] --> E
     D["Step 3 — achievement VM\nPublish .NET → Start Kestrel"] --> E
-    E["Step 4 — frontend VM\nnpm install → ng build → Reload Nginx"]
+    E["Step 4 — frontend VM\nnpm install → ng build → Start Nginx"]
 ```
 
 ---
@@ -262,16 +263,43 @@ The systemd unit was created by the provisioning script. Enable and start it:
 sudo systemctl enable --now achievements
 ```
 
-### 3.3 Reload Nginx
+### 3.3 Configure Nginx
 
-The provisioning script creates the Nginx site config and symlink before Kestrel
-is running. Reload Nginx so it picks up the port 4006 config:
+With Kestrel running, create the Nginx site config to proxy external port 4006 to Kestrel on localhost:5006:
 
 ```bash
-sudo systemctl reload nginx
+sudo tee /etc/nginx/sites-available/achievements <<'EOF'
+server {
+    listen 4006;
+    server_name achievement;
+
+    location / {
+        proxy_pass         http://127.0.0.1:5006;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade $http_upgrade;
+        proxy_set_header   Connection keep-alive;
+        proxy_set_header   Host $host;
+        proxy_set_header   X-Real-IP $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+EOF
+
+sudo ln -sf /etc/nginx/sites-available/achievements \
+            /etc/nginx/sites-enabled/achievements
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t
 ```
 
-### 3.4 Verify
+### 3.4 Start Nginx
+
+```bash
+sudo systemctl start nginx
+```
+
+### 3.5 Verify
 
 ```bash
 # Kestrel direct (localhost only — internal port 5006, bypasses Nginx)
@@ -317,16 +345,63 @@ node --max-old-space-size=400 \
 # Output: /opt/kidzcart/frontend/kids-marketplace-ui/dist/kids-marketplace-ui/
 ```
 
-### 4.3 Reload Nginx
+### 4.3 Configure Nginx
 
-The Nginx site config and proxy rules were set up by the provisioning script.
-After the build completes, reload Nginx to pick up the new dist files:
+With the dist folder in place, create the KidzCart site config with Angular routing and API proxy rules:
 
 ```bash
-sudo systemctl reload nginx
+sudo tee /etc/nginx/sites-available/kidzcart <<'EOF'
+server {
+    listen 80;
+    server_name frontend;
+
+    root /opt/kidzcart/frontend/kids-marketplace-ui/dist/kids-marketplace-ui;
+    index index.html;
+
+    # Angular routing — serve index.html for all non-file routes
+    location / {
+        try_files $uri $uri/ /index.html =404;
+    }
+
+    # /api/products  /api/donations  /api/notifications  /api/health → product VM
+    location ~ ^/api/(products|donations|notifications|health) {
+        rewrite ^/api/(.*)$ /$1 break;
+        proxy_pass http://product:4002;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # /api/auth  /api/users  /api/orders  /api/coupon → marketplace VM
+    location ~ ^/api/(auth|users|orders|coupon) {
+        rewrite ^/api/(.*)$ /$1 break;
+        proxy_pass http://marketplace:4001;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # /api/achievements → achievement VM
+    location /api/achievements {
+        rewrite ^/api/(.*)$ /$1 break;
+        proxy_pass http://achievement:4006;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+EOF
+
+sudo ln -sf /etc/nginx/sites-available/kidzcart \
+            /etc/nginx/sites-enabled/kidzcart
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t
 ```
 
-### 4.4 Verify
+### 4.4 Start Nginx
+
+```bash
+sudo systemctl start nginx
+```
+
+### 4.5 Verify
 
 Open a browser on your host:
 
@@ -348,7 +423,7 @@ Run these from your host to confirm all services are reachable:
 mysql -h infra -u admin -p'Admin@1234' -e "SHOW DATABASES;"
 mongosh "mongodb://infra:27017/kids_marketplace" --eval "db.products.countDocuments()"
 redis-cli -h infra ping
-# RabbitMQ UI: http://infra:15672  (admin/admin)
+# RabbitMQ UI: http://infra:15672  (guest/guest or admin/admin)
 
 # Backend services
 curl http://marketplace:4001/health
@@ -374,11 +449,11 @@ sudo systemctl start tomcat
 vagrant ssh product
 pm2 resurrect   # restores saved process list
 
-# achievement
+# achievement — both services are enabled to start automatically on boot
 vagrant ssh achievement
 sudo systemctl start achievements nginx
 
-# frontend — Nginx starts automatically via systemd
+# frontend — Nginx is enabled to start automatically on boot; no action needed
 ```
 
 ---
