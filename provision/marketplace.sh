@@ -39,14 +39,16 @@ echo "==> [marketplace] Installing Tomcat ${TOMCAT_VERSION}"
 useradd -m -U -d "${TOMCAT_HOME}" -s /bin/false "${TOMCAT_USER}" || true
 
 # Download and extract
-cd /tmp
-curl -fsSL \
-    "https://archive.apache.org/dist/tomcat/tomcat-10/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz" \
-    -o "apache-tomcat-${TOMCAT_VERSION}.tar.gz"
+(
+    cd /tmp
+    curl -fsSL \
+        "https://archive.apache.org/dist/tomcat/tomcat-10/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz" \
+        -o "apache-tomcat-${TOMCAT_VERSION}.tar.gz"
 
-mkdir -p "${TOMCAT_HOME}"
-tar -xzf "apache-tomcat-${TOMCAT_VERSION}.tar.gz" \
-    -C "${TOMCAT_HOME}" --strip-components=1
+    mkdir -p "${TOMCAT_HOME}"
+    tar -xzf "apache-tomcat-${TOMCAT_VERSION}.tar.gz" \
+        -C "${TOMCAT_HOME}" --strip-components=1
+)
 
 chown -R "${TOMCAT_USER}:${TOMCAT_USER}" "${TOMCAT_HOME}"
 chmod -R u+x "${TOMCAT_HOME}/bin"
@@ -93,4 +95,4 @@ echo "    Java   : $(java -version 2>&1 | head -1)"
 echo "    Maven  : $(mvn -version 2>&1 | head -1)"
 echo "    Tomcat : ${TOMCAT_HOME}  (port ${TOMCAT_PORT}, service: tomcat)"
 echo ""
-echo "    Next: follow install-guide.md Step 2 to build and deploy the WAR."
+echo "    Next: follow install-guide.md Step 1 to build and deploy the WAR."
