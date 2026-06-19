@@ -106,7 +106,7 @@ sudo systemctl stop tomcat
 git clone https://github.com/hkhcoder/kidzcart.git /opt/kidzcart
 ```
 
-### 1.1 Build the WAR
+### 1.3 Build the WAR
 
 ```bash
 cd /opt/kidzcart/services/marketplace-service
@@ -115,7 +115,7 @@ mvn package -DskipTests
 
 This produces `target/marketplace-service-0.0.1-SNAPSHOT.war`.
 
-### 1.2 Deploy to Tomcat
+### 1.4 Deploy to Tomcat
 
 ```bash
 sudo rm -rf /opt/tomcat/webapps/ROOT*
@@ -125,14 +125,14 @@ sudo chown tomcat:tomcat /opt/tomcat/webapps/ROOT.war
 sudo systemctl start tomcat
 ```
 
-### 1.3 Watch the startup log
+### 1.5 Watch the startup log
 
 ```bash
 sudo tail -f /opt/tomcat/logs/catalina.out
 # Wait for: Started MarketplaceApplication in [X] seconds
 ```
 
-### 1.4 Verify
+### 1.6 Verify
 
 ```bash
 curl http://localhost:4001/health
