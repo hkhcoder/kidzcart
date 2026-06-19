@@ -47,7 +47,8 @@ GRANT ALL PRIVILEGES ON kids_marketplace_order.* TO '${MYSQL_ADMIN_USER}'@'${PRI
 FLUSH PRIVILEGES;
 SQL
 
-sudo systemctl restart mysql
+systemctl restart mysql
+
 # =============================================================================
 # 2. MongoDB 7
 # =============================================================================
@@ -56,7 +57,7 @@ curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc \
     | gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor
 
 echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] \
-https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" \
+https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/7.0 multiverse" \
     | tee /etc/apt/sources.list.d/mongodb-org-7.0.list
 
 apt-get update -qq
