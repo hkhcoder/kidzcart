@@ -96,8 +96,11 @@ mongosh "mongodb://127.0.0.1:27017/kids_marketplace" \
 ```bash
 vagrant ssh marketplace
 ```
-
-### 1.0 Clone the repository
+### 1.1 Stop Tomcat Service
+```bash
+sudo systemctl stop tomcat
+```
+### 1.2 Clone the repository
 
 ```bash
 git clone https://github.com/hkhcoder/kidzcart.git /opt/kidzcart
