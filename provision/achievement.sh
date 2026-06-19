@@ -2,13 +2,9 @@
 # =============================================================================
 # KidzCart — achievement VM provisioner
 # Installs: .NET 8 SDK, Nginx
-# Configures: Nginx as reverse proxy skeleton for Kestrel on port 4006
-# Does NOT publish or start the application — see install-guide.md
+# Does NOT configure Nginx, publish, or start the application — see install-guide.md
 # =============================================================================
 set -euo pipefail
-
-KESTREL_PORT="4006"
-KESTREL_INTERNAL_PORT="5006"
 
 echo "==> [achievement] System update"
 apt-get update -qq
@@ -33,36 +29,8 @@ dotnet --version
 # =============================================================================
 echo "==> [achievement] Installing Nginx"
 apt-get install -y -qq nginx
-
-# Configure Nginx to proxy port 4006 → Kestrel on localhost:4006
-# Kestrel binds to 127.0.0.1:4006; Nginx accepts external traffic.
-tee /etc/nginx/sites-available/achievements <<EOF
-server {
-    listen ${KESTREL_PORT};
-    server_name achievement;
-
-    location / {
-        proxy_pass         http://127.0.0.1:${KESTREL_INTERNAL_PORT};
-        proxy_http_version 1.1;
-        proxy_set_header   Upgrade \$http_upgrade;
-        proxy_set_header   Connection keep-alive;
-        proxy_set_header   Host \$host;
-        proxy_set_header   X-Real-IP \$remote_addr;
-        proxy_set_header   X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header   X-Forwarded-Proto \$scheme;
-        proxy_cache_bypass \$http_upgrade;
-    }
-}
-EOF
-
-ln -sf /etc/nginx/sites-available/achievements \
-       /etc/nginx/sites-enabled/achievements
-rm -f /etc/nginx/sites-enabled/default
-
-nginx -t
-systemctl enable --now nginx
-# Note: Nginx is running but will return 502 until Kestrel is started.
-# See install-guide.md Step 4 for publish and start instructions.
+systemctl enable nginx
+# Nginx site config and proxy rules are applied manually — see install-guide.md Step 3.
 
 # =============================================================================
 # 3. Dedicated system user + publish directory
@@ -100,10 +68,10 @@ EOF
 
 systemctl daemon-reload
 # Service is registered but NOT enabled/started — the app must be published first.
-# See install-guide.md Step 4.
+# See install-guide.md Step 3.
 
 echo "==> [achievement] Provisioning complete"
 echo "    .NET : $(dotnet --version)"
-echo "    Nginx: listening on port ${KESTREL_PORT} (proxying to Kestrel)"
+echo "    Nginx: installed (not yet configured)"
 echo ""
-echo "    Next: follow install-guide.md Step 4 to publish and start the service."
+echo "    Next: follow install-guide.md Step 3 to configure Nginx, publish, and start the service."
